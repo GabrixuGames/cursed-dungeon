@@ -1,9 +1,5 @@
 # 🐉 Cursed Dungeon
 
-*Versión actual: v0.2*
-
----
-
 ## 📌 Descripción general
 
 *Cursed Dungeon* es un juego de rol por turnos ambientado en un universo oscuro y maldito. El jugador explora mazmorras, se enfrenta a enemigos cada vez más peligrosos y desarrolla sus habilidades a través de un sistema de progresión por niveles. El objetivo final es derrotar a *Ella, Diosa de la Perdición*, en el nivel 70.
@@ -43,10 +39,14 @@ El juego combina mecánicas clásicas de combate RPG con elementos estratégicos
 
 ---
 
+## 🗂️ Estructura del proyecto
+
+```plaintext
 Cursed-Dungeon/
-├── data/                 # Configuración de enemigos, niveles, etc.
-├── engine/               # Lógica de combate y control del juego
-├── animations/           # Animaciones y efectos visuales
-├── assets/               # Archivos visuales o de sonido (futuros)
-├── main.py               # Punto de entrada del juego
-└── README.md             # Este archivo
+├── data/           # Configuración de enemigos, niveles, estados, etc.
+├── engine/         # Lógica del juego: combate, gestión de turnos, etc.
+├── animations/     # Animaciones y efectos visuales en terminal
+├── assets/         # Archivos visuales o sonoros (planeado para el futuro)
+├── main.py         # Punto de entrada del juego
+├── requirements.txt# Lista de dependencias del proyecto
+└── README.md       # Este archivo con la documentació
