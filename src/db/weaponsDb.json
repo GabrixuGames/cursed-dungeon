@@ -1,0 +1,176 @@
+[
+    {
+        "name": "Espadon",
+        "damage": 10,
+        "attack_ratio": 0.5,
+        "price": 80
+    },
+    {
+        "name": "Espada Recta",
+        "damage": 7,
+        "attack_ratio": 0.7,
+        "price": 75
+    },
+    {
+        "name": "Katana",
+        "damage": 4,
+        "attack_ratio": 1.0,
+        "price": 95
+    },
+    {
+        "name": "Mazo",
+        "damage": 8,
+        "attack_ratio": 0.6,
+        "price": 100
+    },
+    {
+        "name": "Espada del Dragón Eterno",
+        "damage": 50,
+        "attack_ratio": 0.3,
+        "price": 500
+    },
+    {
+        "name": "Daga Rápida",
+        "damage": 5,
+        "attack_ratio": 1.0,
+        "price": 60
+    },
+    {
+        "name": "Hacha de Titanio",
+        "damage": 20,
+        "attack_ratio": 0.5,
+        "price": 150
+    },
+    {
+        "name": "Hoja de la Noche",
+        "damage": 15,
+        "attack_ratio": 0.8,
+        "price": 180
+    },
+    {
+        "name": "Maza Colosal",
+        "damage": 30,
+        "attack_ratio": 0.4,
+        "price": 300
+    },
+    {
+        "name": "Lanza del Destino",
+        "damage": 25,
+        "attack_ratio": 0.6,
+        "price": 250
+    },
+    {
+        "name": "Falcata",
+        "damage": 12,
+        "attack_ratio": 0.75,
+        "price": 120
+    },
+    {
+        "name": "Espada del Fénix",
+        "damage": 45,
+        "attack_ratio": 0.5,
+        "price": 400
+    },
+    {
+        "name": "Cimitarra",
+        "damage": 18,
+        "attack_ratio": 0.8,
+        "price": 160
+    },
+    {
+        "name": "Garras del Tigre",
+        "damage": 11,
+        "attack_ratio": 0.9,
+        "price": 130
+    },
+    {
+        "name": "Hacha de Guerra",
+        "damage": 22,
+        "attack_ratio": 0.6,
+        "price": 200
+    },
+    {
+        "name": "Guadaña de la Muerte",
+        "damage": 35,
+        "attack_ratio": 0.4,
+        "price": 350
+    },
+    {
+        "name": "Espada de las Sombras",
+        "damage": 20,
+        "attack_ratio": 0.7,
+        "price": 220
+    },
+    {
+        "name": "Martillo de la Justicia",
+        "damage": 28,
+        "attack_ratio": 0.5,
+        "price": 280
+    },
+    {
+        "name": "Espada del Rey",
+        "damage": 40,
+        "attack_ratio": 0.6,
+        "price": 450
+    },
+    {
+        "name": "Daga de los Vientos",
+        "damage": 8,
+        "attack_ratio": 1.0,
+        "price": 70
+    },
+    {
+        "name": "Alabarda del Infinito",
+        "damage": 30,
+        "attack_ratio": 0.5,
+        "price": 320
+    },
+    {
+        "name": "Lanza del Centauro",
+        "damage": 18,
+        "attack_ratio": 0.7,
+        "price": 160
+    },
+    {
+        "name": "Sable del Viento",
+        "damage": 14,
+        "attack_ratio": 0.85,
+        "price": 140
+    },
+    {
+        "name": "Espada del Coloso",
+        "damage": 50,
+        "attack_ratio": 0.35,
+        "price": 600
+    },
+    {
+        "name": "Cuchillo de la Agonía",
+        "damage": 6,
+        "attack_ratio": 1.0,
+        "price": 50
+    },
+    {
+        "name": "Hacha del Inmortal",
+        "damage": 33,
+        "attack_ratio": 0.5,
+        "price": 330
+    },
+    {
+        "name": "Espada del Dios de los Dragones",
+        "damage": 48,
+        "attack_ratio": 0.4,
+        "price": 550
+    },
+    {
+        "name": "Daga del Asesino",
+        "damage": 9,
+        "attack_ratio": 0.9,
+        "price": 90
+    },
+    {
+        "name": "Espadon del Dios de la Destruccion",
+        "damage": 50,
+        "attack_ratio": 0.8,
+        "price": 1000
+    }
+]
