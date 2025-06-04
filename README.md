@@ -48,5 +48,4 @@ Cursed-Dungeon/
 ├── animations/     # Animaciones y efectos visuales en terminal
 ├── assets/         # Archivos visuales o sonoros (planeado para el futuro)
 ├── main.py         # Punto de entrada del juego
-├── requirements.txt# Lista de dependencias del proyecto
 └── README.md       # Este archivo con la documentació
