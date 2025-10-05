@@ -27,8 +27,10 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
         # Calcular posiciones para el texto y la animación
         texto_x = recuadro_x + MenuConfig.MENU_PADDING
         texto_y = recuadro_y + MenuConfig.TITLE_Y_OFFSET  # Subir el texto del menú
-        animacion_x = recuadro_x + recuadro_width // 2 - MenuConfig.ANIMATION_OFFSET  # Mover aún más a la derecha
-        animacion_y = recuadro_y + recuadro_height // 2 - MenuConfig.ANIMATION_OFFSET  # Bajar un poco más
+        
+        # Posicionar la fogata más cerca del texto del menú
+        bonfire_x = texto_x + 335  # Posición ajustada 15px más a la izquierda
+        bonfire_y = recuadro_y + (recuadro_height - MenuConfig.BONFIRE_SIZE[1]) // 2  # Centrada verticalmente
 
         # Dibujar opciones del menú alineadas a la izquierda
         for i, opcion in enumerate(opciones):
@@ -36,9 +38,22 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
             text_surface = font_text.render(opcion, True, color)
             screen.blit(text_surface, (texto_x, texto_y + i * MenuConfig.OPTION_SPACING))
 
-        # Escalar la animación para hacerla más grande
-        bonfire_frame = pygame.transform.scale(bonfire_frames[current_frame], (MenuConfig.ANIMATION_SIZE, MenuConfig.ANIMATION_SIZE))
-        screen.blit(bonfire_frame, (animacion_x, animacion_y))
+        # Dibujar línea de controles debajo del menú
+        controls_text = "| ↑/↓ seleccionar | Enter entrar | Esc salir |"
+        # Crear fuente más pequeña para los controles
+        try:
+            small_font = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 18)
+        except:
+            small_font = pygame.font.Font(None, 18)
+        
+        controls_surface = small_font.render(controls_text, True, Colors.GRAY)
+        controls_x = recuadro_x + (recuadro_width - controls_surface.get_width()) // 2  # Centrado en el recuadro
+        controls_y = recuadro_y + recuadro_height - 30  # 30px desde el borde inferior del recuadro
+        screen.blit(controls_surface, (controls_x, controls_y))
+
+        # La animación ya está en el tamaño correcto, no necesita escalado
+        bonfire_frame = bonfire_frames[current_frame]
+        screen.blit(bonfire_frame, (bonfire_x, bonfire_y))
 
         pygame.display.flip()
 
@@ -56,7 +71,13 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
         current_frame = 0
 
         # Precalcular cuadros de la animación de la fogata
-        bonfire_frames = precalculate_bonfire_frames(font_ascii_menu)
+        # Crear una fuente más grande específicamente para la fogata
+        try:
+            big_font_ascii = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 20)
+        except:
+            big_font_ascii = pygame.font.Font(None, 60)  # Fuente del sistema como fallback
+        
+        bonfire_frames = precalculate_bonfire_frames(big_font_ascii)
         frame_timer = 0
         FRAME_DURATION = MenuConfig.ANIMATION_FRAME_DURATION  # ms (ajustado para una animación ligeramente más lenta)
 
@@ -76,6 +97,10 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
                     elif event.key == pygame.K_DOWN:
                         seleccion = (seleccion + 1) % len(opciones)
                         mostrar_menu_juego(screen, font_text, main_character, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
+                    elif event.key == pygame.K_ESCAPE:
+                        # Escape vuelve al menú principal
+                        fade_out(screen, TransitionConfig.LONG_FADE)
+                        return True
                     elif event.key == pygame.K_RETURN:
                         if seleccion == 0:
                             fade_out(screen, TransitionConfig.NORMAL_FADE)

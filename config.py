@@ -70,7 +70,7 @@ class MenuConfig:
     ANIMATION_OFFSET = 100
     
     # Animación de fogata
-    BONFIRE_SIZE = (300, 300)
+    BONFIRE_SIZE = (300, 200)  # Tamaño proporcional para fuente 20px
     BONFIRE_FRAME_DURATION = 600  # ms
     ANIMATION_FRAME_DURATION = 600  # ms
     ANIMATION_SIZE = 300

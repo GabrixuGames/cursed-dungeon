@@ -47,6 +47,19 @@ def show_level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font
             x = (WINDOW_WIDTH - text_width) // 2  # Center horizontally
             y = start_y + (len(options_info) + i) * MenuConfig.OPTION_SPACING  # line spacing
             screen.blit(text_surface, (x, y))
+
+        # Dibujar línea de controles debajo del menú
+        controls_text = "| ↑/↓ seleccionar | Enter entrar | Esc salir |"
+        # Crear fuente más pequeña para los controles
+        try:
+            small_font = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 18)
+        except:
+            small_font = pygame.font.Font(None, 18)
+        
+        controls_surface = small_font.render(controls_text, True, Colors.GRAY)
+        controls_x = (WINDOW_WIDTH - controls_surface.get_width()) // 2
+        controls_y = start_y + (len(options_info) + len(selectable_options)) * MenuConfig.OPTION_SPACING + 40
+        screen.blit(controls_surface, (controls_x, controls_y))
             
         pygame.display.flip()
 
@@ -70,6 +83,10 @@ def show_level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font
                     elif event.key == pygame.K_DOWN:
                         selection = (selection + 1) % len(selectable_options)
                         display_level_up_menu(screen, font_text, main_character, selection)
+                    elif event.key == pygame.K_ESCAPE:
+                        # Escape sale del menú de level up
+                        fade_out(screen, TransitionConfig.NORMAL_FADE)
+                        return True
                     elif event.key == pygame.K_RETURN:
                         if selection == 0:  # Vida
                             if main_character.getAtributes() > 0:

@@ -3,9 +3,9 @@
 import pygame
 from src.others import draw_text
 
-def draw_character(surface, font_ascii, x, y, character, color=(255, 255, 255)):
+def draw_character(surface, font_ascii, x, y, character, color=(255, 255, 255), line_spacing=20):
     for i, line in enumerate(character.splitlines()):
-        draw_text(surface, font_ascii, line, x, y + i * 20, color)
+        draw_text(surface, font_ascii, line, x, y + i * line_spacing, color)
 
 def precalculate_bonfire_frames(font_ascii):
     frames = [
@@ -44,9 +44,11 @@ def precalculate_bonfire_frames(font_ascii):
     ]
     precalculated_frames = []
     for frame in frames:
-        frame_surface = pygame.Surface((300, 250), pygame.SRCALPHA)  # Tamaño aproximado + transparencia
+        # Crear superficie proporcional al tamaño de fuente
+        frame_surface = pygame.Surface((300, 200), pygame.SRCALPHA)
         frame_surface.fill((0, 0, 0, 0))  # Limpia con fondo transparente
-        draw_character(frame_surface, font_ascii, 0, 0, frame)
+        # Centrar la fogata en la superficie pequeña
+        draw_character(frame_surface, font_ascii, 50, 50, frame, line_spacing=20)
         precalculated_frames.append(frame_surface)
     return precalculated_frames
 

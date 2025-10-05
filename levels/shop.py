@@ -35,6 +35,8 @@ def confirm_purchase(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT):
                     selection = (selection - 1) % len(options)
                 elif event.key == pygame.K_DOWN:
                     selection = (selection + 1) % len(options)
+                elif event.key == pygame.K_ESCAPE:
+                    return False  # Escape sale de la tienda
                 elif event.key == pygame.K_RETURN:
                     return selection == 0
 
@@ -90,6 +92,19 @@ def shop(main_character, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
             x = (screen.get_width() - text_width) // 2
             screen.blit(text_surface, (x, y_offset + i * MenuConfig.OPTION_SPACING))
 
+        # Dibujar línea de controles debajo del menú
+        controls_text = "| ↑/↓ seleccionar | Enter entrar | Esc salir |"
+        # Crear fuente más pequeña para los controles
+        try:
+            small_font = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 18)
+        except:
+            small_font = pygame.font.Font(None, 18)
+        
+        controls_surface = small_font.render(controls_text, True, Colors.GRAY)
+        controls_x = (screen.get_width() - controls_surface.get_width()) // 2
+        controls_y = y_offset + len(selectable_options) * MenuConfig.OPTION_SPACING + 40
+        screen.blit(controls_surface, (controls_x, controls_y))
+
         pygame.display.flip()
 
     # Mostrar el menú inicial directamente
@@ -108,6 +123,10 @@ def shop(main_character, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
                 elif event.key == pygame.K_DOWN:
                     selection = (selection + 1) % len(selectable_options)
                     display_shop()
+                elif event.key == pygame.K_ESCAPE:
+                    # Escape sale de la tienda
+                    fade_out(screen, TransitionConfig.NORMAL_FADE)
+                    running = False
                 elif event.key == pygame.K_RETURN:
                     if selection < len(weapons_show):  # Seleccionó un arma
                         selected_weapon = weapons_show[selection]
