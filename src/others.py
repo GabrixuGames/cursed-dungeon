@@ -1,8 +1,9 @@
 import os, time, sys, pygame
+from config import Colors, TransitionConfig, FontConfig, MenuConfig
 
 
 
-def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area=True):
+def slow_print(screen, font_ascii, text, x, y, color=Colors.WHITE, clear_area=True):
     """Draw text char-by-char. Optionally clear the message area first so lines don't overlap.
 
     Clears a horizontal strip starting at x,y using the font height.
@@ -13,10 +14,10 @@ def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area
             text_height = font_ascii.get_height()
             text_width = font_ascii.size(text)[0]
         except Exception:
-            text_height = 20
-            text_width = len(text) * 8
-        clear_rect = (x, y, text_width + 8, text_height + 4)
-        screen.fill((0, 0, 0), clear_rect)
+            text_height = FontConfig.DEFAULT_HEIGHT
+            text_width = len(text) * FontConfig.DEFAULT_CHAR_WIDTH
+        clear_rect = (x, y, text_width + FontConfig.CLEAR_PADDING, text_height + FontConfig.CLEAR_PADDING // 2)
+        screen.fill(Colors.BLACK, clear_rect)
 
     # Inicializa la posición de X
     current_x = x
@@ -24,10 +25,10 @@ def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area
         draw_text(screen, font_ascii, char, current_x, y, color)
         pygame.display.flip()
         current_x += font_ascii.size(char)[0]  # Obtener el ancho real del carácter
-        time.sleep(0.05)
+        time.sleep(TransitionConfig.SLOW_PRINT_DELAY)
 
 
-def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_area=True, timeout=1500, wait_for_key=False, bg_color=(0,0,0,180), border_color=None):
+def blocking_message(screen, font_ascii, text, x, y, color=Colors.WHITE, clear_area=True, timeout=TransitionConfig.MESSAGE_DELAY, wait_for_key=False, bg_color=Colors.BLACK_ALPHA, border_color=None):
     """Type text (using slow_print) and then wait for keypress or timeout (ms).
     Returns when user pressed a key or timeout elapsed.
     """
@@ -37,16 +38,16 @@ def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_
             text_height = font_ascii.get_height()
             text_width = font_ascii.size(text)[0]
         except Exception:
-            text_height = 20
-            text_width = len(text) * 8
-        bg = pygame.Surface((text_width + 12, text_height + 8), pygame.SRCALPHA)
+            text_height = FontConfig.DEFAULT_HEIGHT
+            text_width = len(text) * FontConfig.DEFAULT_CHAR_WIDTH
+        bg = pygame.Surface((text_width + FontConfig.BG_PADDING, text_height + FontConfig.BG_PADDING), pygame.SRCALPHA)
         # Normalize bg_color to RGBA
         if len(bg_color) == 3:
             bg_rgba = (bg_color[0], bg_color[1], bg_color[2], 180)
         else:
             bg_rgba = bg_color
         bg.fill(bg_rgba)
-        screen.blit(bg, (x - 4, y - 2))
+        screen.blit(bg, (x - FontConfig.BG_OFFSET, y - FontConfig.BG_OFFSET // 2))
         # Optional border
         if border_color:
             try:
@@ -67,7 +68,7 @@ def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_
                 return
         if not wait_for_key and pygame.time.get_ticks() - start >= timeout:
             return
-        pygame.time.wait(20)
+        pygame.time.wait(TransitionConfig.EVENT_CHECK_DELAY)
 
 
 def resource_path(relative_path):
@@ -76,21 +77,21 @@ def resource_path(relative_path):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
-def draw_text(screen, font, text, x, y, color=(255, 255, 255)):
+def draw_text(screen, font, text, x, y, color=Colors.WHITE):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x, y))
 
-def mostrar_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500, height=150):
+def show_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500, height=150):
     # Dibuja un rectángulo semitransparente sobre la pantalla
     popup_surface = pygame.Surface((width, height))
     popup_surface.set_alpha(230)  # Transparencia (0-255)
-    popup_surface.fill((30, 30, 30))  # Color del cuadro
+    popup_surface.fill(Colors.POPUP_BG)  # Color del cuadro
 
     # Borde opcional
-    pygame.draw.rect(popup_surface, (255, 255, 255), popup_surface.get_rect(), 2)
+    pygame.draw.rect(popup_surface, Colors.WHITE, popup_surface.get_rect(), 2)
 
     # Renderiza el texto
-    text_surface = font.render(mensaje, True, (255, 255, 255))
+    text_surface = font.render(mensaje, True, Colors.WHITE)
     text_rect = text_surface.get_rect(center=(width // 2, height // 2))
 
     popup_surface.blit(text_surface, text_rect)
@@ -101,11 +102,11 @@ def mostrar_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500,
     screen.blit(popup_surface, (x, y))
     pygame.display.update()
 
-    time.sleep(2)  # Pausa para mostrar el mensaje
+    time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)  # Pausa para mostrar el mensaje
 
 
 class Toast:
-    def __init__(self, text, duration=1500, color=(255,255,255)):
+    def __init__(self, text, duration=TransitionConfig.MESSAGE_DELAY, color=Colors.WHITE):
         self.text = text
         self.duration = duration
         self.color = color
@@ -118,17 +119,17 @@ class ToastManager:
     def __init__(self):
         self.toasts = []
 
-    def add(self, text, duration=1500):
+    def add(self, text, duration=TransitionConfig.MESSAGE_DELAY):
         t = Toast(text, duration)
         t.start = int(time.time() * 1000)
         self.toasts.append(t)
 
-    def add(self, text, duration=1500, color=(255,255,255)):
+    def add(self, text, duration=TransitionConfig.MESSAGE_DELAY, color=Colors.WHITE):
         t = Toast(text, duration, color)
         t.start = int(time.time() * 1000)
         self.toasts.append(t)
 
-    def draw(self, screen, font, x=50, start_y=520, spacing=22):
+    def draw(self, screen, font, x=MenuConfig.TOAST_X, start_y=MenuConfig.TOAST_START_Y, spacing=MenuConfig.TOAST_SPACING):
         now = int(time.time() * 1000)
         alive = []
         y = start_y
@@ -136,20 +137,20 @@ class ToastManager:
             elapsed = now - t.start
             if elapsed < t.duration:
                 # fade out in last 300ms
-                fade_start = max(0, t.duration - 300)
+                fade_start = max(0, t.duration - TransitionConfig.TOAST_FADE_DURATION)
                 if elapsed >= fade_start:
                     alpha = int(255 * (1 - (elapsed - fade_start) / max(1, t.duration - fade_start)))
                 else:
                     alpha = 255
                 # slide up a bit as it ages
-                t.y_offset = int( -10 * (elapsed / t.duration))
+                t.y_offset = int( -MenuConfig.TOAST_SLIDE_OFFSET * (elapsed / t.duration))
 
                 # render text to surface to support alpha and draw a semi-transparent bg
                 text_surface = font.render(t.text, True, t.color)
                 text_w, text_h = text_surface.get_size()
-                bg_surf = pygame.Surface((text_w + 8, text_h + 4), pygame.SRCALPHA)
+                bg_surf = pygame.Surface((text_w + FontConfig.BG_PADDING, text_h + FontConfig.BG_PADDING // 2), pygame.SRCALPHA)
                 # semi-transparent black background
-                bg_color = (0, 0, 0, 180)
+                bg_color = Colors.BLACK_ALPHA
                 bg_surf.fill(bg_color)
                 # apply fade by multiplying alpha
                 try:

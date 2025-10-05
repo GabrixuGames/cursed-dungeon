@@ -20,7 +20,7 @@ def draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, inicial
     UI_LEFT_X = 50
     UI_Y = 170  # name Y (a bit higher)
     # Calcular posición derecha exacta usando el ancho del texto
-    enemy_text = f"{enemy.getName()} - Salud: {enemy.getHealth()}/{hud_enemy_hp} HP"
+    enemy_text = f"{enemy.getName()}"
     enemy_text_width = font_text.size(enemy_text)[0]
     margin = 50
     UI_RIGHT_X = max(UI_LEFT_X + 200, screen.get_width() - margin - enemy_text_width)
@@ -47,7 +47,7 @@ def draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, inicial
     pygame.draw.rect(screen, (255, 255, 255), (enemy_bar_x, BAR_Y, int(BAR_WIDTH * enemy_ratio), BAR_HEIGHT))
 
     # Draw names + numeric HP on top of bars so they are not obscured
-    draw_text(screen, font_text, f"{mainChar.getName()} - Salud: {mainChar.getHealth()}/{inicial_player_health} HP", UI_LEFT_X, UI_Y)
+    draw_text(screen, font_text, f"{mainChar.getName()}", UI_LEFT_X, UI_Y)
     draw_text(screen, font_text, enemy_text, UI_RIGHT_X, UI_Y)
 
     # Draw active toasts (short messages)

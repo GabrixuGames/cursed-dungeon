@@ -1,5 +1,5 @@
 import pygame, time, os
-from src.others import resource_path, show_popup, fade_out
+from src.others import resource_path, mostrar_popup, fade_out
 from config import Colors, MenuConfig, TransitionConfig, AudioConfig
 
 # Absolute path to the sound file, relative to this file
@@ -50,13 +50,13 @@ def show_level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font
             
         pygame.display.flip()
 
-    def level_up_game_loop(screen, font_text, font_ascii, main_character):
+    def menu_juego(screen, font_text, font_ascii, mainChar):
         """Handle the level-up menu interactions."""
-        selection = 0
-        selectable_options = ["Vida", "Daño", "Evasion", "Salir"]
+        seleccion = 0
+        opciones_seleccionables = ["Vida", "Daño", "Evasion", "Salir"]
         
         # Mostrar el menú inicial directamente
-        display_level_up_menu(screen, font_text, main_character, selection)
+        mostrar_menu_juego(screen, font_text, mainChar, seleccion)
         
         while True:
             for event in pygame.event.get():
@@ -65,49 +65,49 @@ def show_level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font
                     return False  # Salir del juego
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        selection = (selection - 1) % len(selectable_options)
-                        display_level_up_menu(screen, font_text, main_character, selection)
+                        seleccion = (seleccion - 1) % len(opciones_seleccionables)
+                        mostrar_menu_juego(screen, font_text, mainChar, seleccion)
                     elif event.key == pygame.K_DOWN:
-                        selection = (selection + 1) % len(selectable_options)
-                        display_level_up_menu(screen, font_text, main_character, selection)
+                        seleccion = (seleccion + 1) % len(opciones_seleccionables)
+                        mostrar_menu_juego(screen, font_text, mainChar, seleccion)
                     elif event.key == pygame.K_RETURN:
-                        if selection == 0:  # Vida
-                            if main_character.getAtributes() > 0:
-                                main_character.setHealth(main_character.getHealth() + MenuConfig.HEALTH_INCREASE)
-                                main_character.setAtributes(main_character.getAtributes() - 1)
-                                show_popup(screen, font_text, f"Vida aumentada a {main_character.getHealth()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                        if seleccion == 0:  # Vida
+                            if mainChar.getAtributes() > 0:
+                                mainChar.setHealth(mainChar.getHealth() + MenuConfig.HEALTH_INCREASE)
+                                mainChar.setAtributes(mainChar.getAtributes() - 1)
+                                mostrar_popup(screen, font_text, f"Vida aumentada a {mainChar.getHealth()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # redraw the menu after
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # redraw the menu after
                             else:
-                                show_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                                mostrar_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # redraw the menu after
-                        elif selection == 1:  # Daño
-                            if main_character.getAtributes() > 0:
-                                main_character.setDamage(main_character.getDamage() + MenuConfig.DAMAGE_INCREASE)
-                                main_character.setAtributes(main_character.getAtributes() - 1)
-                                show_popup(screen, font_text, f"Daño aumentado a {main_character.getDamage()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # redraw the menu after
+                        elif seleccion == 1:  # Daño
+                            if mainChar.getAtributes() > 0:
+                                mainChar.setDamage(mainChar.getDamage() + MenuConfig.DAMAGE_INCREASE)
+                                mainChar.setAtributes(mainChar.getAtributes() - 1)
+                                mostrar_popup(screen, font_text, f"Daño aumentado a {mainChar.getDamage()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # Redibujar el menú después
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # Redibujar el menú después
                             else:
-                                show_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                                mostrar_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # Redibujar el menú después
-                        elif selection == 2:  # Evasion
-                            if main_character.getAtributes() > 0:
-                                main_character.setEvadeChance(main_character.getEvadeChance() + MenuConfig.EVASION_INCREASE)
-                                main_character.setAtributes(main_character.getAtributes() - 1)
-                                show_popup(screen, font_text, f"Evasion aumentada a {main_character.getEvadeChance()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # Redibujar el menú después
+                        elif seleccion == 2:  # Evasion
+                            if mainChar.getAtributes() > 0:
+                                mainChar.setEvadeChance(mainChar.getEvadeChance() + MenuConfig.EVASION_INCREASE)
+                                mainChar.setAtributes(mainChar.getAtributes() - 1)
+                                mostrar_popup(screen, font_text, f"Evasion aumentada a {mainChar.getEvadeChance()}.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 pygame.display.flip()
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # Redibujar el menú después
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # Redibujar el menú después
                             else:
-                                show_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
+                                mostrar_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", WINDOW_WIDTH, WINDOW_HEIGHT, MenuConfig.POPUP_WIDTH, MenuConfig.POPUP_HEIGHT)
                                 pygame.display.flip()
                                 time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)
-                                display_level_up_menu(screen, font_text, main_character, selection)  # Redibujar el menú después
-                        elif selection == 3:  # Salir
+                                mostrar_menu_juego(screen, font_text, mainChar, seleccion)  # Redibujar el menú después
+                        elif seleccion == 3:  # Salir
                             fade_out(screen, TransitionConfig.NORMAL_FADE)
                             return True  # Salir del menú del juego
                     
-    level_up_game_loop(screen, font_text, font_ascii, main_character)
+    menu_juego(screen, font_text, font_ascii, mainChar)

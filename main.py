@@ -2,20 +2,21 @@ import pygame
 import time
 import os
 from src.object.mainChar import MainChar
-from levels.start_game import start_game_name, start_game_weapons
+from levels.start_game import get_character_name, select_starting_weapon
 from src.others import slow_print, resource_path, fade_out, fade_in
 from levels.game_menu import game_menu
+from config import DisplayConfig, AudioConfig, FontConfig, Colors, MenuConfig, TransitionConfig, GameConfig
 
 
 
 # Configuración de la ventana
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-FONT_SIZE = 20
-FPS = 60
+WINDOW_WIDTH = DisplayConfig.WINDOW_WIDTH
+WINDOW_HEIGHT = DisplayConfig.WINDOW_HEIGHT
+FONT_SIZE = FontConfig.SMALL_SIZE
+FPS = DisplayConfig.FPS
 
-main_menu_sound = pygame.mixer.Sound(resource_path("src/sounds/main_menu_entrance.mp3"))
-main_menu_sound.set_volume(0.15)  # Ajusta el volumen según sea necesario
+main_menu_sound = pygame.mixer.Sound(resource_path(AudioConfig.MAIN_MENU_MUSIC))
+main_menu_sound.set_volume(AudioConfig.MAIN_MENU_VOLUME)
 main_menu_sound.play(-1)  # Reproduce el sonido en bucle
 
 
@@ -25,10 +26,10 @@ def init_pygame():
     pygame.init()
 
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    font_text = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 25)
-    pygame.display.set_caption("Cursed Dungeon")
-    font_ascii = pygame.font.SysFont("Courier", FONT_SIZE)
-    font_title = pygame.font.Font(resource_path("src/assets/fonts/Viking.ttf"), 120)
+    font_text = pygame.font.Font(resource_path(FontConfig.MAIN_FONT), FontConfig.MEDIUM_SIZE)
+    pygame.display.set_caption(DisplayConfig.CAPTION)
+    font_ascii = pygame.font.SysFont(FontConfig.MONO_FONT, FONT_SIZE)
+    font_title = pygame.font.Font(resource_path(FontConfig.TITLE_FONT), FontConfig.TITLE_SIZE)
     return screen, font_text, font_ascii, font_title
 
 # Creación de una clase para manejar el menú principal
@@ -36,17 +37,17 @@ class MainMenu:
     def __init__(self, screen, font_text, font_title, main_menu_sound):
         self.screen = screen
         self.font_text = font_text
-        self.font_title = pygame.font.Font(resource_path("src/assets/fonts/Viking.ttf"), 80)  # Tamaño reducido
+        self.font_title = pygame.font.Font(resource_path(FontConfig.TITLE_FONT), FontConfig.LARGE_SIZE)
         self.main_menu_sound = main_menu_sound
         self.seleccion = 0
 
     def display(self):
         """Dibuja el menú principal en la pantalla."""
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(Colors.BLACK)
         title = "CURSED DUNGEON"
-        title_surface = self.font_title.render(title, True, (255, 255, 255))
+        title_surface = self.font_title.render(title, True, Colors.WHITE)
         title_x = (WINDOW_WIDTH - title_surface.get_width()) // 2
-        title_y = 100
+        title_y = MenuConfig.TITLE_Y_OFFSET
         self.screen.blit(title_surface, (title_x, title_y))
 
         opciones = [
@@ -55,15 +56,15 @@ class MainMenu:
             "Salir"
         ]
 
-        total_height = len(opciones) * 40
+        total_height = len(opciones) * MenuConfig.OPTION_SPACING
         start_y = (WINDOW_HEIGHT - total_height) // 2
 
         for i, opcion in enumerate(opciones):
-            color = (255, 255, 0) if i == self.seleccion else (255, 255, 255)
+            color = Colors.YELLOW if i == self.seleccion else Colors.WHITE
             text_surface = self.font_text.render(opcion, True, color)
             text_width = text_surface.get_width()
             x = (WINDOW_WIDTH - text_width) // 2
-            y = start_y + i * 40
+            y = start_y + i * MenuConfig.OPTION_SPACING
             self.screen.blit(text_surface, (x, y))
 
         pygame.display.flip()
@@ -104,56 +105,56 @@ def main():
 
         if action == "new_game":
             # Transición suave antes de ir a la creación de personaje
-            fade_out(screen, 600)
+            fade_out(screen, TransitionConfig.NORMAL_FADE)
             
-            name = start_game_name(screen, font_text)
-            start_weapon = start_game_weapons(screen, font_text)
-            mainChar = MainChar(name)
-            mainChar.setWeapon(start_weapon)
+            name = get_character_name(screen, font_text)
+            start_weapon = select_starting_weapon(screen, font_text)
+            main_character = MainChar(name)
+            main_character.setWeapon(start_weapon)
             
             # Preparar la pantalla de confirmación
-            screen.fill((0, 0, 0))
-            slow_print(screen, font_text, f"Muy bien {mainChar.name}, comenzarás tu aventura con {mainChar.weapon['name']}", 100, 100)
+            screen.fill(Colors.BLACK)
+            slow_print(screen, font_text, f"Muy bien {main_character.name}, comenzarás tu aventura con {main_character.weapon['name']}", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
             pygame.display.flip()
             time.sleep(2)
             
             # Transición al menú del juego
-            fade_out(screen, 600)
+            fade_out(screen, TransitionConfig.NORMAL_FADE)
             main_menu_sound.stop()
-            game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)
+            game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
 
         elif action == "continue":
-            if os.path.exists("save.json"):
+            if os.path.exists(GameConfig.SAVE_FILE):
                 # Transición suave antes de cargar
-                fade_out(screen, 600)
+                fade_out(screen, TransitionConfig.NORMAL_FADE)
                 
-                screen.fill((0, 0, 0))
+                screen.fill(Colors.BLACK)
                 loading_message = "Cargando partida..."
-                text_surface = font_text.render(loading_message, True, (255, 255, 255))
-                text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
-                text_y = (WINDOW_HEIGHT - text_surface.get_height()) // 2
+                text_surface = font_text.render(loading_message, True, Colors.WHITE)
+                text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
+                text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
                 screen.blit(text_surface, (text_x, text_y))
                 pygame.display.flip()
                 time.sleep(1.5)
                 
-                mainChar = MainChar("")
-                mainChar.load_game()
+                main_character = MainChar("")
+                main_character.load_game()
                 
                 # Transición al menú del juego
-                fade_out(screen, 600)
+                fade_out(screen, TransitionConfig.NORMAL_FADE)
                 main_menu_sound.stop()
-                game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)
+                game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
             else:
                 # Mensaje de error con transición suave
-                fade_out(screen, 500)
-                screen.fill((0, 0, 0))
-                slow_print(screen, font_text, "No hay partida guardada.", 100, 100)
+                fade_out(screen, TransitionConfig.SHORT_FADE)
+                screen.fill(Colors.BLACK)
+                slow_print(screen, font_text, "No hay partida guardada.", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
                 pygame.display.flip()
                 time.sleep(2)
-                fade_out(screen, 500)
+                fade_out(screen, TransitionConfig.SHORT_FADE)
 
         elif action == "quit":
-            fade_out(screen, 800)
+            fade_out(screen, TransitionConfig.LONG_FADE)
             pygame.quit()
             return
 
