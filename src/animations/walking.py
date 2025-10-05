@@ -7,7 +7,7 @@ import os
 sound_path = os.path.join(os.path.dirname(__file__), '..', 'sounds', 'steps_sound.mp3')
 steps_sound = pygame.mixer.Sound(sound_path)
 
-def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset=0):
+def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, main_character, offset, char_offset=0):
     screen.fill((0, 0, 0))
     draw_custom_dungeon(screen, font_ascii, offset)
 
@@ -23,14 +23,14 @@ def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_hea
     UI_PROMPT_Y = 60
 
     # Show current character health in current/max format
-    draw_text(screen, font_text_combat, f"{mainChar.getName()} - Health: {mainChar.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
+    draw_text(screen, font_text_combat, f"{main_character.getName()} - Health: {main_character.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
     draw_text(screen, font_text_combat, "Press A or D to move through the dungeon.", UI_NAME_X, UI_PROMPT_Y)
 
     pygame.display.flip()
 
 from src.animations.animations import frames_walking_right, frames_walking_left
 
-def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset=0, delay=100, steps_walked=0, steps_until_combat=None, force_steps=0):
+def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, main_character, offset, char_offset=0, delay=100, steps_walked=0, steps_until_combat=None, force_steps=0):
     clock = pygame.time.Clock()
     running = True
     current_frame = 0
@@ -154,7 +154,7 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
         UI_PROMPT_Y = 60
 
         # Always show the name and current health while walking
-        draw_text(screen, font_text_combat, f"{mainChar.getName()} - Health: {mainChar.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
+        draw_text(screen, font_text_combat, f"{main_character.getName()} - Health: {main_character.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
         # Show the prompt in the same position as static state for consistency
         draw_text(screen, font_text_combat, "Press A or D to move through the dungeon.", UI_NAME_X, UI_PROMPT_Y)
 

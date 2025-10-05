@@ -20,7 +20,7 @@ def draw_character(screen, font_ascii, x, y, character, color=(255, 255, 255)):
         draw_text(screen, font_ascii, line, x, y + i * 20, color)
 
 # Player attack animation
-def animation_player_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
+def animation_player_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real):
     frames = [
         """
         
@@ -58,13 +58,13 @@ def animation_player_atack(screen, font_text, font_ascii, player_x, player_y, hu
 
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames:
-        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
+        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real)
         draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)
 
 # Enemy attack animation
-def animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
+def animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real):
     frames_enemy = [
         """
         
@@ -102,13 +102,13 @@ def animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, hud
 
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_enemy:
-        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
+        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real)
         draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current enemy frame
         pygame.display.flip()
         pygame.time.wait(150)
 
 # Player evade animation
-def animation_player_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
+def animation_player_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real):
     frames_evade_player = [
         """
         
@@ -146,13 +146,13 @@ def animation_player_evade(screen, font_text, font_ascii, player_x, player_y, hu
 
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_evade_player:
-        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
+        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real)
         draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)
 
 # Enemy evade animation
-def animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
+def animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real):
     frames_enemy_evade = [
         """
         
@@ -190,13 +190,13 @@ def animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, hud
 
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_enemy_evade:
-        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
+        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real)
         draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current enemy frame
         pygame.display.flip()
         pygame.time.wait(150)
 
 # Player victory animation
-def animation_victory(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
+def animation_victory(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real):
     frames_victory = [
         """
         
@@ -228,7 +228,7 @@ def animation_victory(screen, font_text, font_ascii, player_x, player_y, hud_pla
 
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_victory:
-        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
+        draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, main_character, enemy_real)
         draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)

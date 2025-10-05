@@ -4,7 +4,7 @@ import time, json, os
 from src.animations.animations import animation_player_atack, animation_player_evade, animation_victory
 
 
-class MainCharacter:
+class main_characteracter:
 
     def __init__(self, name):
         self.name = name
@@ -102,24 +102,24 @@ class MainCharacter:
                 # Wait explicitly for a key so the player reads the reward
                 blocking_message(screen, font_text, "Presiona una tecla para continuar...", 50, y_offset, clear_area=True, wait_for_key=True)
     
-    def player_attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
+    def player_attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance, y_offset):
         from src.object.enemy import enemy
         # Apply damage first so animations show updated HP if needed
         enemy_instance.setHealth(enemy_instance.getHealth() - (self.damage + self.weapon["damage"]))
         # Play attack animation (this plays the sound too)
         try:
-            animation_player_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+            animation_player_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance)
         except Exception:
             # If animation fails, continue and return the message
             pass
         return f"{enemy_instance.getName()} recibe {self.damage + self.weapon['damage']} de daño"
     
-    def player_evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
-        animation_player_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+    def player_evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance, y_offset):
+        animation_player_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance)
         return "Esquivas el ataque!"
     
-    def player_victory(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
-        animation_victory(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+    def player_victory(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance, y_offset):
+        animation_victory(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance)
         self.setExperience(self.experience + enemy_instance.getExp())
         self.setMoney(self.money + enemy_instance.getGold())
         # Return two separate messages: victory line and rewards line
