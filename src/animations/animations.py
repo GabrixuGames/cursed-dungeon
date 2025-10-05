@@ -1,23 +1,25 @@
-import pygame, random
+
+import pygame, random, os
 from src.others import draw_text
 
-pygame.mixer.init()  # Inicializa el mezclador de sonido
-player_atack_sound = pygame.mixer.Sound("src\sounds\player_atack.mp3")  # Ajusta la ruta
-player_atack_sound.set_volume(0.75)  # Ajusta el volumen según sea necesario
-enemy_atack_sound = pygame.mixer.Sound("src\sounds\monster_atack.mp3")  # Ajusta la ruta
-enemy_atack_sound.set_volume(0.4)  # Ajusta el volumen según sea necesario 
-enemy_die_sound = pygame.mixer.Sound("src\sounds\monster_died.wav")  # Ajusta la ruta
-enemy_die_sound.set_volume(0.5)  # Ajusta el volumen según sea necesario
-atack_fail_sound = pygame.mixer.Sound("src/sounds/atack_fail.mp3")  # Ajusta la ruta
-atack_fail_sound.set_volume(0.6)  # Ajusta el volumen según sea necesario
-steps_sound = pygame.mixer.Sound("src\sounds\steps_sound.mp3")
+pygame.mixer.init()  # Initialize the sound mixer
+sound_dir = os.path.join(os.path.dirname(__file__), '..', 'sounds')
+player_atack_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'player_atack.mp3'))
+player_atack_sound.set_volume(0.75)
+enemy_atack_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'monster_atack.mp3'))
+enemy_atack_sound.set_volume(0.4)
+enemy_die_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'monster_died.wav'))
+enemy_die_sound.set_volume(0.5)
+atack_fail_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'atack_fail.mp3'))
+atack_fail_sound.set_volume(0.6)
+steps_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'steps_sound.mp3'))
 steps_sound.set_volume(0.2)
 
 def draw_character(screen, font_ascii, x, y, character, color=(255, 255, 255)):
     for i, line in enumerate(character.splitlines()):
         draw_text(screen, font_ascii, line, x, y + i * 20, color)
 
-# Animación de ataque del jugador
+# Player attack animation
 def animation_player_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
     frames = [
         """
@@ -57,11 +59,11 @@ def animation_player_atack(screen, font_text, font_ascii, player_x, player_y, hu
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames:
         draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
-        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # Dibuja el frame actual del jugador
+        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)
 
-# Animación de ataque del enemigo
+# Enemy attack animation
 def animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
     frames_enemy = [
         """
@@ -101,11 +103,11 @@ def animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, hud
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_enemy:
         draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
-        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # Dibuja el frame actual del enemigo
+        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current enemy frame
         pygame.display.flip()
         pygame.time.wait(150)
 
-# Animación de evasión del jugador
+# Player evade animation
 def animation_player_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
     frames_evade_player = [
         """
@@ -145,11 +147,11 @@ def animation_player_evade(screen, font_text, font_ascii, player_x, player_y, hu
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_evade_player:
         draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
-        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # Dibuja el frame actual del jugador
+        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)
 
-# Animación de evasión del enemigo
+# Enemy evade animation
 def animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
     frames_enemy_evade = [
         """
@@ -189,11 +191,11 @@ def animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, hud
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_enemy_evade:
         draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
-        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # Dibuja el frame actual del enemigo
+        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current enemy frame
         pygame.display.flip()
         pygame.time.wait(150)
 
-# Animación de victoria del jugador
+# Player victory animation
 def animation_victory(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real):
     frames_victory = [
         """
@@ -227,7 +229,7 @@ def animation_victory(screen, font_text, font_ascii, player_x, player_y, hud_pla
     from levels.dungeon_combat import draw_combat_scene
     for frame in frames_victory:
         draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, hud_player_hp, hud_enemy_hp, mainChar, enemy_real)
-        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # Dibuja el frame actual del jugador
+        draw_character(screen, font_ascii, player_x, player_y, frame, (255, 255, 255))  # draw current player frame
         pygame.display.flip()
         pygame.time.wait(150)
 

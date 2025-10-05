@@ -1,6 +1,6 @@
 import json
 from src.animations.animations import animation_enemy_atack, animation_enemy_evade
-from src.others import slow_print
+from src.others import slow_print, toast_manager
 
 
 
@@ -80,16 +80,23 @@ class enemy:
     def attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
         mainChar.setHealth(mainChar.getHealth() - self.damage)
         animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
-        slow_print(screen, font_text, f"{self.name} te ha hecho {self.damage} de daño", 50, y_offset)    
+        return f"{self.name} te ha hecho {self.damage} de daño"
     
     def evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
         animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
-        slow_print(screen, font_text, f"{self.name} ha esquivado el ataque", 50, y_offset)
+        return f"{self.name} ha esquivado el ataque"
     
     def apply_state(self, mainChar, screen, font_text, y_offset):
         if self.state:
-            mainChar.setState(self.state)
-            slow_print(screen, font_text, f"{self.name} te ha afectado con {self.state[0]['name']}.", 50, y_offset)
+            # Determine the actual state object (use first if it's a list)
+            state_obj = self.state[0] if isinstance(self.state, list) and len(self.state) > 0 else (self.state if isinstance(self.state, dict) else {})
+            # Apply the single state object to the main character
+            mainChar.setState(state_obj)
+            # State objects in JSON use the key 'state' for the state name (not 'name').
+            # Be defensive: accept either 'state' or 'name' and avoid KeyError.
+            state_name = state_obj.get('state') or state_obj.get('name') or 'un estado'
+            return f"{self.name} te ha afectado con {state_name}."
+        return None
 
 def load_enemies(enemyDb, mainChar):
     lvlmin = mainChar.getLevel() - 4
@@ -102,13 +109,29 @@ def load_enemies(enemyDb, mainChar):
         # Filtrar y crear instancias de Enemy
         for enemy_data in normalEnemy.get("normal", []):
             if int(enemy_data["level_min"]) >= lvlmin and int(enemy_data["level_max"]) <= lvlmax:
+                # Normalizar estados: asegurar que cada estado tenga 'name', 'chance', 'duration' y 'effect'
+                raw_states = enemy_data.get("states", []) or []
+                normalized_states = []
+                for s in raw_states:
+                    # Copiar para no mutar el origen
+                    state_obj = dict(s)
+                    # 'state' en JSON original representa el nombre; normalizamos a 'name'
+                    if 'state' in state_obj and 'name' not in state_obj:
+                        state_obj['name'] = state_obj['state']
+                    # Garantizar claves mínimas
+                    state_obj.setdefault('chance', 0)
+                    state_obj.setdefault('duration', 0)
+                    state_obj.setdefault('effect', {})
+                    # Aceptar también 'name' si ya existe
+                    normalized_states.append(state_obj)
+
                 enemy_instance = enemy(
                     name=enemy_data["name"],
                     health=enemy_data["health"],
                     damage=enemy_data["damage"],
                     evade_chance=enemy_data["evadeChance"],
                     attack_rate=enemy_data["attackRate"],
-                    state=enemy_data.get("states", []),
+                    state=normalized_states,
                     level_min=enemy_data["level_min"],
                     level_max=enemy_data["level_max"]
                 )

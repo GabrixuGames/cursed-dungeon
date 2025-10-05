@@ -1,30 +1,28 @@
 import pygame
-from src.others import slow_print, draw_text
+from src.others import slow_print, draw_text, resource_path
 from src.object.wepons import cargar_armas
-from src.others import resource_path
 
 def start_game_name(screen, font_text, prompt="Introduce el nombre de tu personaje:"):
-    nombre = ""
-    escribiendo = True
+    name = ""
+    typing = True
     clock = pygame.time.Clock()
     screen.fill((0, 0, 0))
-    text_width = len(prompt) * 12.5  # 15 es el ancho estimado por carácter en slow_print
+    text_width = len(prompt) * 12.5  # estimated character width used by slow_print
     x = (screen.get_width() - text_width) // 2
     y = screen.get_height()  // 2
     slow_print(screen, font_text, prompt, x, y - 100)
-    prompt_mostrado = True  # Para evitar repetir el slow_print
 
-    while escribiendo:
+    while typing:
         screen.fill((0, 0, 0))
 
-        # Redibujar el prompt después del slow_print
+        # Redraw the prompt after slow_print
         draw_text(screen, font_text, prompt, x, y - 100)
 
-        # Renderizar el nombre escrito hasta ahora
-        nombre_surface = font_text.render(nombre, True, (255, 255, 255))
-        nombre_x = (screen.get_width() - nombre_surface.get_width()) // 2
-        nombre_y = y - 100 + 40
-        screen.blit(nombre_surface, (nombre_x, nombre_y))
+        # Render the name typed so far
+        name_surface = font_text.render(name, True, (255, 255, 255))
+        name_x = (screen.get_width() - name_surface.get_width()) // 2
+        name_y = y - 100 + 40
+        screen.blit(name_surface, (name_x, name_y))
 
         pygame.display.flip()
 
@@ -35,16 +33,16 @@ def start_game_name(screen, font_text, prompt="Introduce el nombre de tu persona
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    escribiendo = False
+                    typing = False
                 elif event.key == pygame.K_BACKSPACE:
-                    nombre = nombre[:-1]
+                    name = name[:-1]
                 else:
-                    if len(nombre) < 15:
-                        nombre += event.unicode
+                    if len(name) < 15:
+                        name += event.unicode
 
         clock.tick(30)
 
-    return nombre
+    return name
 
 
 def start_game_weapons(screen, font_text):
@@ -53,13 +51,13 @@ def start_game_weapons(screen, font_text):
 
     slow_print(screen, font_text, "Selecciona tu arma:", 50, 100)
 
-    weapons_list = cargar_armas(resource_path("src\db\weaponsDb.json"))
+    weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
     weapons_show = weapons_list[:4]
     opciones = []
     
     y_offset = 150
     for i, weapon in enumerate(weapons_show):
-        texto = f"{i + 1}. {weapon['name']} - Daño: {weapon['damage']} | Velocidad: {weapon['attack_ratio']}"
+        texto = f"{i + 1}. {weapon['name']} - Damage: {weapon['damage']} | Speed: {weapon['attack_ratio']}"
         opciones.append(texto)
         slow_print(screen, font_text, texto, 50, y_offset)
         y_offset += 40

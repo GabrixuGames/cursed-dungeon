@@ -1,6 +1,6 @@
 import pygame, copy, random, time
 from src.object.enemy import load_enemies
-from src.others import resource_path, draw_text, slow_print, draw_custom_dungeon
+from src.others import resource_path, draw_text, slow_print, draw_custom_dungeon, blocking_message, combat_message_box
 from src.animations.walking import dungeon_walking, draw_dungeon_static
 from src.animations.animations import play_combat_intro
 
@@ -16,8 +16,58 @@ battle_start_sound.set_volume(0.5)  # Ajusta el volumen según sea necesario
 def draw_combat_scene(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy):
     screen.fill((0, 0, 0))
     draw_custom_dungeon(screen, font_ascii, offset=0)  # Dibuja el fondo de la mazmora
-    draw_text(screen, font_text, f"Salud: {mainChar.getHealth()}/{inicial_player_health} HP", 50, 200)
-    draw_text(screen, font_text, f"{enemy.getName()}: {enemy.getHealth()}/{hud_enemy_hp} HP", 750, 200)
+    # UI simétrica: jugador a la izquierda, enemigo a la derecha
+    UI_LEFT_X = 50
+    UI_Y = 170  # name Y (a bit higher)
+    # Calcular posición derecha exacta usando el ancho del texto
+    enemy_text = f"{enemy.getName()} - Salud: {enemy.getHealth()}/{hud_enemy_hp} HP"
+    enemy_text_width = font_text.size(enemy_text)[0]
+    margin = 50
+    UI_RIGHT_X = max(UI_LEFT_X + 200, screen.get_width() - margin - enemy_text_width)
+
+    # Draw simple health bars under the names (white fill per aesthetic)
+    BAR_WIDTH = 200
+    BAR_HEIGHT = 16
+    BAR_Y = UI_Y + 40  # increase gap so bars sit below the names
+
+    # Player bar (left)
+    player_hp = mainChar.getHealth()
+    player_max = inicial_player_health
+    player_ratio = max(0.0, min(1.0, player_hp / player_max)) if player_max > 0 else 0
+    player_bar_x = UI_LEFT_X
+    pygame.draw.rect(screen, (80, 80, 80), (player_bar_x, BAR_Y, BAR_WIDTH, BAR_HEIGHT))
+    pygame.draw.rect(screen, (255, 255, 255), (player_bar_x, BAR_Y, int(BAR_WIDTH * player_ratio), BAR_HEIGHT))
+
+    # Enemy bar (right)
+    enemy_hp = enemy.getHealth()
+    enemy_max = hud_enemy_hp if hud_enemy_hp > 0 else enemy.getHealth()
+    enemy_ratio = max(0.0, min(1.0, enemy_hp / enemy_max)) if enemy_max > 0 else 0
+    enemy_bar_x = UI_RIGHT_X
+    pygame.draw.rect(screen, (80, 80, 80), (enemy_bar_x, BAR_Y, BAR_WIDTH, BAR_HEIGHT))
+    pygame.draw.rect(screen, (255, 255, 255), (enemy_bar_x, BAR_Y, int(BAR_WIDTH * enemy_ratio), BAR_HEIGHT))
+
+    # Draw names + numeric HP on top of bars so they are not obscured
+    draw_text(screen, font_text, f"{mainChar.getName()} - Salud: {mainChar.getHealth()}/{inicial_player_health} HP", UI_LEFT_X, UI_Y)
+    draw_text(screen, font_text, enemy_text, UI_RIGHT_X, UI_Y)
+
+    # Draw active toasts (short messages)
+    try:
+        from src.others import toast_manager
+        toast_manager.draw(screen, font_text)
+    except Exception:
+        pass
+
+    # Draw persistent combat message box last so it stays visible
+    try:
+        from src.others import combat_message_box
+        # draw the persistent box (new draw_box returns multiple coords)
+        try:
+            combat_message_box.draw_box(screen, font_text)
+        except TypeError:
+            # backward compatibility
+            combat_message_box.draw_box(screen, font_text)
+    except Exception:
+        pass
 
 
 def dungeon(mainChar, screen, font_ascii, font_text_combat):
@@ -28,17 +78,18 @@ def dungeon(mainChar, screen, font_ascii, font_text_combat):
     random.shuffle(enemies_valid)
     number_of_enemies = max(1, random.randint(mainChar.getLevel() - 2, mainChar.getLevel() + 3)) if mainChar.getLevel() <= 15 else random.randint(12, 18)
     enemies_to_defeat = [copy.deepcopy(random.choice(enemies_valid)) for _ in range(number_of_enemies)]
-    enemies_defeaten = 0
+    enemies_defeated = 0
     inicial_player_health = mainChar.getHealth()
     steps_walked = 0
-    steps_until_combat = random.randint(10, 20)
+    # Increase walking range before combat: 40-80 steps
+    steps_until_combat = random.randint(40, 80)
     offset = 0  # Offset inicial del fondo
     char_offset = 0  # Offset inicial del personaje
 
     background_sound.play(-1)
 
 
-    draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset)
+    draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset)
 
     running = True
     while running:
@@ -51,35 +102,53 @@ def dungeon(mainChar, screen, font_ascii, font_text_combat):
         keys = pygame.key.get_pressed()
         # Solo llamamos a dungeon_walking si se pulsa A o D
         if keys[pygame.K_d] or keys[pygame.K_a]:
-            offset, steps_made, char_offset = dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset)
-            steps_walked += steps_made
-            print(f"Steps walked: {steps_walked}, Steps until combat: {steps_until_combat}")
+            res = dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset, delay=100, steps_walked=steps_walked, steps_until_combat=steps_until_combat)
+            # res puede ser (offset, steps_made, char_offset) o (offset, steps_made, char_offset, True)
+            if isinstance(res, tuple) and len(res) >= 3:
+                offset, steps_made, char_offset = res[0], res[1], res[2]
+                steps_walked += steps_made
 
-            if steps_walked >= steps_until_combat:
-                enemy_instance = enemies_to_defeat[enemies_defeaten]
-                battle_start_sound.play()
-                time.sleep(1)
-                play_combat_intro(screen, font_ascii)
-                combat_result = run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_y, inicial_player_health, enemy_instance)
-                if combat_result == "defeat":
-                    background_sound.stop()
-                    return
-                enemies_defeaten += 1
-                steps_walked = 0
-                steps_until_combat = random.randint(10, 20)
+                # Si la función indicó interrumpir para combate, entra inmediatamente
+                if len(res) == 4 and res[3] is True:
+                    enemy_instance = enemies_to_defeat[enemies_defeated]
+                    battle_start_sound.play()
+                    time.sleep(1)
+                    play_combat_intro(screen, font_ascii)
+                    # pass current offsets so the combat can preserve/return them
+                    combat_result = run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_y, inicial_player_health, enemy_instance, offset, char_offset)
+                    # combat_result is a tuple (result_flag, offset, char_offset)
+                    if isinstance(combat_result, tuple):
+                        result_flag, offset, char_offset = combat_result
+                        if result_flag == "defeat":
+                            background_sound.stop()
+                            return
+                    else:
+                        # If unexpected, stop the dungeon
+                        background_sound.stop()
+                        return
 
-                if enemies_defeaten == len(enemies_to_defeat):
-                    y_offset =+ 30
-                    slow_print(screen, font_text_combat, "¡Has derrotado a todos los enemigos de la mazmorra!", 50, y_offset)
-                    time.sleep(2)
-                    background_sound.stop()
-                    return
+                    enemies_defeated += 1
+                    steps_walked = 0
+                    # reset steps until next combat in the 40-80 range
+                    steps_until_combat = random.randint(40, 80)
+
+                    if enemies_defeated == len(enemies_to_defeat):
+                        y_offset =+ 30
+                        slow_print(screen, font_text_combat, "¡Has derrotado a todos los enemigos de la mazmorra!", 50, y_offset)
+                        time.sleep(2)
+                        # After showing the dungeon clear message, wait for user to press a key
+                        try:
+                            combat_message_box.show(screen, font_text_combat, "Presiona una tecla para continuar...", wait_for_key=True)
+                        except Exception:
+                            blocking_message(screen, font_text_combat, "Presiona una tecla para continuar...", 50, y_offset + 26, wait_for_key=True)
+                        background_sound.stop()
+                        return
 
         clock.tick(60)
 
 
 
-def run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_y, inicial_player_health, enemy_instance):
+def run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_y, inicial_player_health, enemy_instance, offset=0, char_offset=0):
     clock = pygame.time.Clock()
     player_attack_speed = mainChar.getWeapon()["attack_ratio"]
     enemy_attack_speed = enemy_instance.getAttackRate()
@@ -105,28 +174,63 @@ def run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_
         if current_time - last_player_attack >= 1000 / player_attack_speed:
             evade_chance = random.uniform(0, 100)
 
-            # Aplicar efectos activos que dañan salud
+            # Aplicar efectos activos que dañan salud al personaje (usar mainChar)
             for active_state in player_active_states[:]:
-                if "health" in active_state["effect"]:
-                    inicial_player_health -= active_state["effect"]["health"]
-                    y_offset += 30
-                    draw_text(screen, font_text_combat, f"Pierdes {active_state['effect']['health']} puntos de salud debido al {active_state['name']}.", 50, y_offset)
+                if "health" in active_state.get("effect", {}):
+                    # Reducir la salud actual del personaje
+                    mainChar.setHealth(mainChar.getHealth() + active_state["effect"]["health"])  # effect health es negativo en los JSON
+                    # Show styled blocking message so it is readable over background
+                    state_text = f"Pierdes {active_state['effect']['health']} puntos de salud debido al {active_state.get('state', active_state.get('name', 'un estado'))}."
+                    try:
+                        combat_message_box.show(screen, font_text_combat, state_text, timeout=1000)
+                    except Exception:
+                        draw_text(screen, font_text_combat, state_text, 50, y_offset + 30)
                     player_active_states.remove(active_state)
 
+            # Enemy may evade or be hit; these functions now return message strings
             if evade_chance < enemy_evade:
-                enemy_instance.evade(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                msg = enemy_instance.evade(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
             else:
-                mainChar.player_attack(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                msg = mainChar.player_attack(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+
+            if msg:
+                try:
+                    combat_message_box.show(screen, font_text_combat, msg, timeout=900)
+                except Exception:
+                    blocking_message(screen, font_text_combat, msg, 50, y_offset + 30, timeout=900)
+                pygame.time.wait(200)
             
             if enemy_instance.getHealth() <= 0:
-                mainChar.player_victory(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                victory_msg = mainChar.player_victory(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                # Show the victory message typed and wait a bit for the player to read
+                if victory_msg:
+                    # Support either a single string or a list of strings
+                    if isinstance(victory_msg, (list, tuple)):
+                        # show two lines slightly lower and styled; second line waits for key
+                        left_x = 50
+                        base_y = y_offset + 10
+                        try:
+                            # show first victory line briefly, then show rewards line without blocking
+                            combat_message_box.show(screen, font_text_combat, victory_msg[0], timeout=1400)
+                            combat_message_box.show(screen, font_text_combat, victory_msg[1], timeout=1400)
+                        except Exception:
+                            blocking_message(screen, font_text_combat, victory_msg[0], left_x, base_y, timeout=1400, bg_color=(0,0,0,200), border_color=(200,200,200))
+                            # show rewards line with timeout (do not wait for key here)
+                            blocking_message(screen, font_text_combat, victory_msg[1], left_x, base_y + 26, timeout=1400, bg_color=(0,0,0,200), border_color=(200,200,200))
+                        # After victory messages, show explicit 'press any key to continue' prompt
+                        try:
+                            combat_message_box.show(screen, font_text_combat, "Presiona una tecla para continuar...", wait_for_key=True)
+                        except Exception:
+                            blocking_message(screen, font_text_combat, "Presiona una tecla para continuar...", 50, base_y + 56, wait_for_key=True)
+                    else:
+                        blocking_message(screen, font_text_combat, victory_msg, 50, y_offset, timeout=1600)
 
                 if mainChar.getExperience() >= mainChar.getToNextLevel():
                     y_offset += 30
                     mainChar.next_level(screen, font_text_combat, y_offset)
 
                 pygame.display.flip()
-                pygame.time.wait(1000)
+                pygame.time.wait(800)
                 break
             last_player_attack = current_time
 
@@ -135,28 +239,45 @@ def run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_
             evade_chance = random.uniform(0, 100)
 
             if evade_chance < player_evade:
-                mainChar.player_evade(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                msg = mainChar.player_evade(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                if msg:
+                    try:
+                        combat_message_box.show(screen, font_text_combat, msg, timeout=700)
+                    except Exception:
+                        blocking_message(screen, font_text_combat, msg, 50, y_offset + 30, timeout=700)
             else:
-                enemy_instance.attack(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                msg = enemy_instance.attack(screen, font_text_combat, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset)
+                if msg:
+                    try:
+                        combat_message_box.show(screen, font_text_combat, msg, timeout=900)
+                    except Exception:
+                        blocking_message(screen, font_text_combat, msg, 50, y_offset + 30, timeout=900)
 
                 if enemy_instance.getState():
                     apply_effect_chance = random.uniform(0, 100)
                     if apply_effect_chance < enemy_instance.state[0]["chance"]:
-                        enemy_instance.apply_state(enemy_instance, screen, font_text_combat, y_offset)
-                        player_active_states.append(enemy_instance.getState())
+                        # apply_state expects the main character as the first argument and now returns a message
+                        state_msg = enemy_instance.apply_state(mainChar, screen, font_text_combat, y_offset)
+                        if mainChar.getState():
+                            player_active_states.append(mainChar.getState())
+                        if state_msg:
+                            try:
+                                combat_message_box.show(screen, font_text_combat, state_msg, timeout=1000)
+                            except Exception:
+                                blocking_message(screen, font_text_combat, state_msg, 50, y_offset + 30, timeout=1000)
 
             last_enemy_attack = current_time
 
         # Revisar condiciones de derrota/victoria
 
         if mainChar.getHealth() <= 0:
-            slow_print(screen, font_text_combat, "Te has quedado sin puntos de salud...", 50, y_offset)
+            slow_print(screen, font_text_combat, "Te has quedado sin puntos de salud...", 50, y_offset, clear_area=True)
             y_offset += 30
-            slow_print(screen, font_text_combat, f"El {enemy_instance.getName()} te ha derrotado...", 50, y_offset)
+            slow_print(screen, font_text_combat, f"El {enemy_instance.getName()} te ha derrotado...", 50, y_offset, clear_area=True)
             exp_lost = mainChar.getExperience() * 0.20
             mainChar.setExperience(mainChar.getExperience() - exp_lost)
             y_offset += 30
-            slow_print(screen, font_text_combat, f"Has perdido {round(exp_lost)} experiencia.", 50, y_offset)
+            slow_print(screen, font_text_combat, f"Has perdido {round(exp_lost)} experiencia.", 50, y_offset, clear_area=True)
             mainChar.setHealth(inicial_player_health)
             pygame.display.flip()
             pygame.time.wait(2000)
@@ -166,7 +287,7 @@ def run_combat(mainChar, screen, font_ascii, font_text_combat, player_x, player_
         pygame.display.flip()
         clock.tick(60)  # Limitar a 60 FPS
         
-    offset = 0
-    draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset)
-    return "victory"
+    # After combat, return control and preserve the last offsets so the player appears
+    # where they left off instead of resetting to initial position.
+    return "victory", offset, char_offset
     

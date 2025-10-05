@@ -5,8 +5,8 @@ from src.others import resource_path
 from src.others import mostrar_popup
 
 def shop(mainChar, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
-    """Muestra la tienda en la ventana de Pygame."""
-    # Cargar armas y seleccionar aleatoriamente 5
+    """Show the shop in the Pygame window."""
+    # Load weapons and randomly select 5
     weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
     random.shuffle(weapons_list)
     weapons_show = weapons_list[:5]
@@ -26,14 +26,14 @@ def shop(mainChar, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
     # Opción para salir
     opciones.append(f"{len(weapons_show) + 1}. Salir")
 
-    # Calcular la posición inicial para centrar verticalmente
+    # Calculate start position to vertically center the menu
     total_height = len(opciones) * 30  # Espaciado entre líneas
     start_y = (screen.get_height() - total_height) // 2
 
-    # Bucle principal de la tienda
+    # Main shop loop
     while running:
-        # Dibujar las opciones en la pantalla solo si es necesario
-        screen.fill((0, 0, 0))  # Limpiar la pantalla solo antes de dibujar el menú
+        # Draw options on screen (clear screen before drawing the menu)
+        screen.fill((0, 0, 0))
         for i, opcion in enumerate(opciones):
             text_surface = font.render(opcion, True, (255, 255, 255))
             text_width = text_surface.get_width()
@@ -43,14 +43,14 @@ def shop(mainChar, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
 
         pygame.display.flip()
 
-        # Manejar eventos
+    # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return False  # Salir del juego
 
             if event.type == pygame.KEYDOWN:
-                # Convertir la tecla presionada en un número
+                # Convert pressed key to a number
                 if pygame.K_1 <= event.key <= pygame.K_9:
                     selected = event.key - pygame.K_1  # Convertir la tecla en índice (0-8)
                     if 0 <= selected < len(weapons_show):
