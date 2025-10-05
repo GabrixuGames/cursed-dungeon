@@ -4,7 +4,7 @@ import time, json, os
 from src.animations.animations import animation_player_atack, animation_player_evade, animation_victory
 
 
-class main_characteracter:
+class MainCharacter:
 
     def __init__(self, name):
         self.name = name
