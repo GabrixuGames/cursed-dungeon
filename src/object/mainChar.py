@@ -1,4 +1,5 @@
-from src.others import slow_print
+import pygame
+from src.others import slow_print, toast_manager
 import time, json, os
 from src.animations.animations import animation_player_atack, animation_player_evade, animation_victory
 
@@ -86,38 +87,60 @@ class MainChar:
             self.level = self.level + 1
             self.atributes = self.atributes + 3
             self.experience = 0
-            slow_print(screen, font_text, f"Has subido de nivel!",  50, y_offset)
-            y_offset += 30
-            slow_print(screen, font_text, f"Nivel: {self.level}, tienes {self.atributes} putnos de atributos.",  50, y_offset)
-            time.sleep(4)
+            # Use blocking_message so the level-up messages appear typed and wait for user input
+            # Use the combat message box for typed messages with fallback
+            from src.others import combat_message_box, blocking_message
+            try:
+                combat_message_box.show(screen, font_text, "Has subido de nivel!", timeout=1200)
+                combat_message_box.show(screen, font_text, f"Nivel: {self.level}, tienes {self.atributes} puntos de atributos.", timeout=1400)
+                combat_message_box.show(screen, font_text, "Presiona una tecla para continuar...", wait_for_key=True)
+            except Exception:
+                blocking_message(screen, font_text, "Has subido de nivel!", 50, y_offset, clear_area=True, timeout=1200)
+                y_offset += 30
+                blocking_message(screen, font_text, f"Nivel: {self.level}, tienes {self.atributes} puntos de atributos.", 50, y_offset, clear_area=True, timeout=1400)
+                y_offset += 35
+                # Wait explicitly for a key so the player reads the reward
+                blocking_message(screen, font_text, "Presiona una tecla para continuar...", 50, y_offset, clear_area=True, wait_for_key=True)
     
     def player_attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
         from src.object.enemy import enemy
+        # Apply damage first so animations show updated HP if needed
         enemy_instance.setHealth(enemy_instance.getHealth() - (self.damage + self.weapon["damage"]))
-        animation_player_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
-        slow_print(screen, font_text, f"Has hecho {self.damage + self.weapon["damage"]} de daño a {enemy_instance.getName()}.",  50, y_offset)
+        # Play attack animation (this plays the sound too)
+        try:
+            animation_player_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+        except Exception:
+            # If animation fails, continue and return the message
+            pass
+        return f"{enemy_instance.getName()} recibe {self.damage + self.weapon['damage']} de daño"
     
     def player_evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
         animation_player_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
-        slow_print(screen, font_text, f"Has esquivado el ataque.",  50, y_offset)
+        return "Esquivas el ataque!"
     
     def player_victory(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
         animation_victory(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
         self.setExperience(self.experience + enemy_instance.getExp())
         self.setMoney(self.money + enemy_instance.getGold())
-        slow_print(screen, font_text, f"¡Has derrotado a {enemy_instance.getName()}!", 50, y_offset)
-        y_offset += 30
-        slow_print(screen, font_text, f"Has ganado {enemy_instance.getExp()} de experiencia y {enemy_instance.getGold()} de oro.",  50, y_offset)
-        time.sleep(4)
+        # Return two separate messages: victory line and rewards line
+        msg1 = f"Has derrotado a {enemy_instance.getName()}!"
+        msg2 = f"Has ganado {enemy_instance.getExp()} exp y {enemy_instance.getGold()} oro!"
+        return [msg1, msg2]
     
     def state_damage(self, screen, font_text, y_offset):
         if self.state:
             if "health" in self.state["effect"]:
                 self.health = self.health - self.state["effect"]["health"]
-                slow_print(screen, font_text, f"Pierdes {self.state['effect']['health']} puntos de salud debido al {self.state['name']}.", 50, y_offset)
+                try:
+                    toast_manager.add(f"Pierdes {self.state['effect']['health']} puntos de salud debido al {self.state['name']}.", duration=1400)
+                except Exception:
+                    slow_print(screen, font_text, f"Pierdes {self.state['effect']['health']} puntos de salud debido al {self.state['name']}.", 50, y_offset, clear_area=True)
                 y_offset += 30
                 if self.health <= 0:
-                    slow_print(screen, font_text, f"Has sido derrotado por el {self.state['name']}.", 50, y_offset)
+                    try:
+                        toast_manager.add(f"Has sido derrotado por el {self.state['name']}.", duration=1800)
+                    except Exception:
+                        slow_print(screen, font_text, f"Has sido derrotado por el {self.state['name']}.", 50, y_offset, clear_area=True)
                     time.sleep(4)
                     return False
         return True

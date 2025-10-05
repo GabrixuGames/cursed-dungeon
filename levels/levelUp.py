@@ -1,15 +1,16 @@
-import pygame, time
-from src.others import resource_path
-from src.others import mostrar_popup
+import pygame, time, os
+from src.others import resource_path, mostrar_popup
 
-game_menu_sound = pygame.mixer.Sound(resource_path("src\sounds\menu_bonfire_sound.mp3"))
-game_menu_sound.set_volume(0.25)  # Ajusta el volumen según sea necesario
+# Absolute path to the sound file, relative to this file
+sound_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'sounds', 'menu_bonfire_sound.mp3')
+game_menu_sound = pygame.mixer.Sound(sound_path)
+game_menu_sound.set_volume(0.25)
 
 
 def level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii):
     def mostrar_menu_juego(screen, font_text, mainChar):
-        """Dibuja el menú del juego en la pantalla, centrado."""
-        game_menu_sound.play(-1)  # Reproduce el sonido en bucle
+        """Draw the level-up menu centered on the screen."""
+        game_menu_sound.play(-1)  # Play sound in loop
         screen.fill((0, 0, 0))
         opciones = [
             "Aqui pudes subir tus estadisticas usando los puntos de atributos disponibles.",
@@ -20,20 +21,20 @@ def level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font
             "3. Evasion.",
             "4. Salir."
         ]
-        # Calcular la posición inicial para centrar verticalmente
-        total_height = len(opciones) * 40  # Espaciado entre líneas
+        # Calculate start position to vertically center the menu
+        total_height = len(opciones) * 40  # spacing between lines
         start_y = (WINDOW_HEIGHT - total_height) // 2
 
         for i, opcion in enumerate(opciones):
             text_surface = font_text.render(opcion, True, (255, 255, 255))
             text_width = text_surface.get_width()
-            x = (WINDOW_WIDTH - text_width) // 2  # Centrar horizontalmente
-            y = start_y + i * 40  # Espaciado entre líneas
+            x = (WINDOW_WIDTH - text_width) // 2  # Center horizontally
+            y = start_y + i * 40  # line spacing
             screen.blit(text_surface, (x, y))
         pygame.display.flip()
 
     def menu_juego(screen, font_text, font_ascii, mainChar):
-        """Maneja el menú del juego."""
+        """Handle the level-up menu interactions."""
         mostrar_menu_juego(screen, font_text, mainChar)
         while True:
             for event in pygame.event.get():
@@ -47,11 +48,11 @@ def level_up_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font
                             mainChar.setAtributes(mainChar.getAtributes() - 1)
                             mostrar_popup(screen, font_text, f"Vida aumentada a {mainChar.getHealth()}.", WINDOW_WIDTH, WINDOW_HEIGHT, 500, 150)
                             time.sleep(2)
-                            mostrar_menu_juego(screen, font_text, mainChar)  # Redibujar el menú después
+                            mostrar_menu_juego(screen, font_text, mainChar)  # redraw the menu after
                         else:
                             mostrar_popup(screen, font_text, f"No tienes puntos de atributo suficentes.", 500, 150)
                             time.sleep(2)
-                            mostrar_menu_juego(screen, font_text, mainChar)  # Redibujar el menú después   
+                            mostrar_menu_juego(screen, font_text, mainChar)  # redraw the menu after
                     elif event.key == pygame.K_2:
                         if mainChar.getAtributes() > 0:
                             mainChar.setDamage(mainChar.getDamage() + 1)
