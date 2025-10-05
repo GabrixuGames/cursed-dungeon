@@ -51,10 +51,20 @@ def start_game_weapons(screen, font_text):
 
     slow_print(screen, font_text, "Selecciona tu arma:", 50, 100)
 
-    weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
+    try:
+        weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
+        if not weapons_list:
+            raise ValueError("La lista de armas está vacía o no se pudo cargar.")
+    except Exception as e:
+        slow_print(screen, font_text, f"Error al cargar armas: {e}", 50, 150)
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        exit()
+
     weapons_show = weapons_list[:4]
     opciones = []
-    
+
     y_offset = 150
     for i, weapon in enumerate(weapons_show):
         texto = f"{i + 1}. {weapon['name']} - Damage: {weapon['damage']} | Speed: {weapon['attack_ratio']}"

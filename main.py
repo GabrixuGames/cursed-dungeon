@@ -31,41 +31,55 @@ def init_pygame():
     font_title = pygame.font.Font(resource_path("src/assets/fonts/Viking.ttf"), 120)
     return screen, font_text, font_ascii, font_title
 
-def mostrar_menu_principal(screen, font_text, font_title):
-    """Dibuja el menú principal en la pantalla, centrado."""
-    screen.fill((0, 0, 0))
-    # Título con fuente diferente
-    font_title = pygame.font.Font("src/assets/fonts/Viking.ttf", 60)
-    title = "CURSED DUNGEON"
-    title_surface = font_title.render(title, True, (255, 255, 255))
-    title_width = title_surface.get_width()
-    title_height = title_surface.get_height()
+# Creación de una clase para manejar el menú principal
+class MainMenu:
+    def __init__(self, screen, font_text, font_title, main_menu_sound):
+        self.screen = screen
+        self.font_text = font_text
+        self.font_title = pygame.font.Font(resource_path("src/assets/fonts/Viking.ttf"), 80)  # Tamaño reducido
+        self.main_menu_sound = main_menu_sound
 
-    
-    # Opciones con la fuente regular
-    opciones = [
-        "1. Iniciar partida.",
-        "2. Continuar.",
-        "3. Salir."
-    ]
+    def display(self):
+        """Dibuja el menú principal en la pantalla."""
+        self.screen.fill((0, 0, 0))
+        title = "CURSED DUNGEON"
+        title_surface = self.font_title.render(title, True, (255, 255, 255))
+        title_x = (WINDOW_WIDTH - title_surface.get_width()) // 2
+        title_y = 100
+        self.screen.blit(title_surface, (title_x, title_y))
 
-    title_x = (WINDOW_WIDTH - title_width) // 2
-    title_y = (WINDOW_HEIGHT - len(opciones)) - 500
-    screen.blit(title_surface, (title_x, title_y))
-    
+        opciones = [
+            "1. Iniciar partida.",
+            "2. Continuar.",
+            "3. Salir."
+        ]
 
+        total_height = len(opciones) * 40
+        start_y = (WINDOW_HEIGHT - total_height) // 2
 
-    # Calcular la posición inicial para centrar verticalmente
-    total_height = len(opciones) * 40  # Espaciado entre líneas
-    start_y = (WINDOW_HEIGHT - total_height) // 2
+        for i, opcion in enumerate(opciones):
+            text_surface = self.font_text.render(opcion, True, (255, 255, 255))
+            text_width = text_surface.get_width()
+            x = (WINDOW_WIDTH - text_width) // 2
+            y = start_y + i * 40
+            self.screen.blit(text_surface, (x, y))
 
-    for i, opcion in enumerate(opciones):
-        text_surface = font_text.render(opcion, True, (255, 255, 255))
-        text_width = text_surface.get_width()
-        x = (WINDOW_WIDTH - text_width) // 2  # Centrar horizontalmente
-        y = start_y + i * 40  # Espaciado entre líneas
-        screen.blit(text_surface, (x, y))
-    pygame.display.flip()
+        pygame.display.flip()
+
+    def handle_events(self):
+        """Maneja los eventos del menú principal."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return "quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    return "new_game"
+                elif event.key == pygame.K_2:
+                    return "continue"
+                elif event.key == pygame.K_3:
+                    return "quit"
+        return None
 
 
 
@@ -74,73 +88,47 @@ def main():
     screen, font_text, font_ascii, font_title = init_pygame()
     clock = pygame.time.Clock()
 
-
-    # Menú principal
+    main_menu = MainMenu(screen, font_text, font_title, main_menu_sound)
     mainChar = None
-    mostrar_menu_principal(screen, font_text, font_title)
+
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    # Iniciar nueva partida
-                    name = start_game_name(screen, font_text)  # Se añade la lista de armas
-                    start_weapon = start_game_weapons(screen, font_text)  # Se añade la lista de armas # Simular entrada de texto
-                    mainChar = MainChar(name)
-                    mainChar.setWeapon(start_weapon)
-                    screen.fill((0, 0, 0))
-                    text_surface = font_text.render(f"Muy bien {mainChar.name}, comenzarás tu aventura con {mainChar.weapon["name"]}", True, (255, 255, 255))
-                    text_width = text_surface.get_width()
-                    text_height = text_surface.get_height()
+        main_menu.display()
+        action = main_menu.handle_events()
 
-                    x = (screen.get_width() - text_width) // 2
-                    y = (screen.get_height() - text_height) // 2
+        if action == "new_game":
+            name = start_game_name(screen, font_text)
+            start_weapon = start_game_weapons(screen, font_text)
+            mainChar = MainChar(name)
+            mainChar.setWeapon(start_weapon)
+            screen.fill((0, 0, 0))
+            slow_print(screen, font_text, f"Muy bien {mainChar.name}, comenzarás tu aventura con {mainChar.weapon['name']}", 100, 100)
+            pygame.display.flip()
+            time.sleep(2)
+            main_menu_sound.stop()
+            game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)  # Llamar al menú de partida
 
-                    slow_print(screen, font_text, f"Muy bien {mainChar.name}, comenzarás tu aventura con {mainChar.weapon["name"]}", x, y - 100)
+        elif action == "continue":
+            if os.path.exists("save.json"):
+                screen.fill((0, 0, 0))
+                loading_message = "Cargando partida..."
+                text_surface = font_text.render(loading_message, True, (255, 255, 255))
+                text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
+                text_y = (WINDOW_HEIGHT - text_surface.get_height()) // 2
+                screen.blit(text_surface, (text_x, text_y))
+                pygame.display.flip()
+                time.sleep(1.5)
+                mainChar = MainChar("")
+                mainChar.load_game()
+                main_menu_sound.stop()
+                game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)  # Llamar al menú de partida
+            else:
+                slow_print(screen, font_text, "No hay partida guardada.", 100, 100)
+                pygame.display.flip()
+                time.sleep(2)
 
-                    pygame.display.flip()
-                    time.sleep(2)
-                    main_menu_sound.stop()  # Detener el sonido del menú principal
-                    
-                elif event.key == pygame.K_2:
-                    if os.path.exists("save.json"):
-                        # Limpiar la pantalla y mostrar "Cargando..."
-                        screen.fill((0, 0, 0))  # Limpiar la pantalla
-                        text_surface = font_text.render("Cargando partida...", True, (255, 255, 255))
-                        text_width = text_surface.get_width()
-                        text_height = text_surface.get_height()
-
-                        x = (screen.get_width() - text_width) // 2
-                        y = (screen.get_height() - text_height) // 2
-
-                        slow_print(screen, font_text, "Cargando partida...", x, y)
-                        pygame.display.flip()
-                        time.sleep(1.5)  # Simular tiempo de carga
-                        
-                        # Cargar la partida
-                        mainChar = MainChar("")
-                        mainChar.load_game()
-                        main_menu_sound.stop()
-                        game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)
-                        break
-                    else:
-                        slow_print(screen, font_text, "No hay partida guardada.", 10, 150)
-                        pygame.display.flip()
-                        time.sleep(2)
-                elif event.key == pygame.K_3:
-                    pygame.quit()
-                    return
-            # Aquí manejamos los eventos del ratón sin bloquear el cierre de la ventana
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Botón izquierdo del ratón
-                    # Este bloque ya no interfiere con el evento de la ventana
-                    continue
-
-        if mainChar:
-            break
-
+        elif action == "quit":
+            pygame.quit()
+            return
 
     pygame.quit()
 
