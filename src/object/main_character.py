@@ -146,26 +146,96 @@ class MainCharacter:
         return True
 
     def save_game(self):
-        save_data = {
-            "name": self.name,
-            "level": self.level,
-            "damage": self.damage,
-            "health": self.health,
-            "evade_chance": self.evade_chance,
-            "experience": self.experience,
-            "money": self.money,
-            "atributes": self.atributes,
-            "weapon": self.weapon,
-            "to_next_level": self.to_next_level
-        }
-        save_path = os.path.join(os.getcwd(), "save.json")
-        with open(save_path, "w") as save_file:
-            json.dump(save_data, save_file)
+        """Save game data to JSON file with error handling."""
+        try:
+            save_data = {
+                "name": self.name,
+                "level": self.level,
+                "damage": self.damage,
+                "health": self.health,
+                "evade_chance": self.evade_chance,
+                "experience": self.experience,
+                "money": self.money,
+                "atributes": self.atributes,
+                "weapon": self.weapon,
+                "to_next_level": self.to_next_level
+            }
+            save_path = os.path.join(os.getcwd(), "save.json")
+            
+            # Create backup of existing save file if it exists
+            if os.path.exists(save_path):
+                backup_path = save_path + ".backup"
+                try:
+                    os.rename(save_path, backup_path)
+                except OSError as e:
+                    print(f"Warning: Could not create backup: {e}")
+            
+            with open(save_path, "w", encoding='utf-8') as save_file:
+                json.dump(save_data, save_file, indent=2, ensure_ascii=False)
+            
+            # Remove backup if save was successful
+            backup_path = save_path + ".backup"
+            if os.path.exists(backup_path):
+                try:
+                    os.remove(backup_path)
+                except OSError:
+                    pass  # Backup can stay if removal fails
+                    
+            return True
+            
+        except (IOError, OSError) as e:
+            print(f"Error saving game (File I/O): {e}")
+            # Restore backup if save failed
+            backup_path = save_path + ".backup"
+            if os.path.exists(backup_path):
+                try:
+                    os.rename(backup_path, save_path)
+                    print("Backup restored due to save failure")
+                except OSError:
+                    pass
+            return False
+            
+        except json.JSONEncodeError as e:
+            print(f"Error saving game (JSON encoding): {e}")
+            return False
+            
+        except Exception as e:
+            print(f"Unexpected error saving game: {e}")
+            return False
     
     def load_game(self):
+        """Load game data from JSON file with error handling."""
         save_path = os.path.join(os.getcwd(), "save.json")
-        with open(save_path, "r") as save_file:
-            save_data = json.load(save_file)
+        
+        try:
+            # Check if save file exists
+            if not os.path.exists(save_path):
+                raise FileNotFoundError(f"Save file not found: {save_path}")
+            
+            # Check if file is readable
+            if not os.access(save_path, os.R_OK):
+                raise PermissionError(f"Cannot read save file: {save_path}")
+            
+            with open(save_path, "r", encoding='utf-8') as save_file:
+                save_data = json.load(save_file)
+                
+            # Validate required fields exist
+            required_fields = ["name", "level", "damage", "health", "evade_chance", 
+                             "experience", "money", "atributes", "weapon", "to_next_level"]
+            
+            for field in required_fields:
+                if field not in save_data:
+                    raise KeyError(f"Missing required field in save data: {field}")
+            
+            # Validate data types and ranges
+            if not isinstance(save_data["level"], int) or save_data["level"] < 1:
+                raise ValueError("Invalid level value")
+            if not isinstance(save_data["health"], int) or save_data["health"] < 0:
+                raise ValueError("Invalid health value")
+            if not isinstance(save_data["name"], str) or not save_data["name"].strip():
+                raise ValueError("Invalid name value")
+                
+            # Load validated data
             self.name = save_data["name"]
             self.level = save_data["level"]
             self.damage = save_data["damage"]
@@ -176,3 +246,47 @@ class MainCharacter:
             self.atributes = save_data["atributes"]
             self.weapon = save_data["weapon"]
             self.to_next_level = save_data["to_next_level"]
+            
+            return True
+            
+        except FileNotFoundError as e:
+            print(f"Save file not found: {e}")
+            return False
+            
+        except PermissionError as e:
+            print(f"Permission error loading save: {e}")
+            return False
+            
+        except json.JSONDecodeError as e:
+            print(f"Error parsing save file (corrupted JSON): {e}")
+            # Try to load backup
+            backup_path = save_path + ".backup"
+            if os.path.exists(backup_path):
+                print("Attempting to load from backup...")
+                try:
+                    with open(backup_path, "r", encoding='utf-8') as backup_file:
+                        save_data = json.load(backup_file)
+                        # Re-validate and load backup data (simplified for brevity)
+                        self.name = save_data.get("name", "Unknown")
+                        self.level = save_data.get("level", 1)
+                        self.damage = save_data.get("damage", 10)
+                        self.health = save_data.get("health", 150)
+                        self.evade_chance = save_data.get("evade_chance", 5)
+                        self.experience = save_data.get("experience", 0)
+                        self.money = save_data.get("money", 0)
+                        self.atributes = save_data.get("atributes", 0)
+                        self.weapon = save_data.get("weapon", {"name": "Bare Hands", "damage": 5, "attack_ratio": 1000})
+                        self.to_next_level = save_data.get("to_next_level", 100)
+                        print("Backup loaded successfully")
+                        return True
+                except Exception as backup_error:
+                    print(f"Backup also corrupted: {backup_error}")
+            return False
+            
+        except (KeyError, ValueError) as e:
+            print(f"Invalid save data: {e}")
+            return False
+            
+        except Exception as e:
+            print(f"Unexpected error loading save: {e}")
+            return False

@@ -22,15 +22,45 @@ main_menu_sound.play(-1)  # Reproduce el sonido en bucle
 
 
 def init_pygame():
-    """Inicializa Pygame y configura la ventana."""
-    pygame.init()
+    """Inicializa Pygame y configura la ventana con manejo de errores."""
+    try:
+        pygame.init()
+        
+        # Check if pygame initialized successfully
+        if not pygame.get_init():
+            raise RuntimeError("Pygame failed to initialize")
 
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    font_text = pygame.font.Font(resource_path(FontConfig.MAIN_FONT), FontConfig.MEDIUM_SIZE)
-    pygame.display.set_caption(DisplayConfig.CAPTION)
-    font_ascii = pygame.font.SysFont(FontConfig.MONO_FONT, FONT_SIZE)
-    font_title = pygame.font.Font(resource_path(FontConfig.TITLE_FONT), FontConfig.TITLE_SIZE)
-    return screen, font_text, font_ascii, font_title
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        
+        # Load fonts with fallbacks
+        try:
+            font_text = pygame.font.Font(resource_path(FontConfig.MAIN_FONT), FontConfig.MEDIUM_SIZE)
+        except (FileNotFoundError, OSError):
+            print(f"Warning: Could not load main font, using system default")
+            font_text = pygame.font.Font(None, FontConfig.MEDIUM_SIZE)
+            
+        try:
+            font_title = pygame.font.Font(resource_path(FontConfig.TITLE_FONT), FontConfig.TITLE_SIZE)
+        except (FileNotFoundError, OSError):
+            print(f"Warning: Could not load title font, using system default")
+            font_title = pygame.font.Font(None, FontConfig.TITLE_SIZE)
+            
+        try:
+            font_ascii = pygame.font.SysFont(FontConfig.MONO_FONT, FONT_SIZE)
+        except Exception:
+            print(f"Warning: Could not load mono font, using default")
+            font_ascii = pygame.font.Font(None, FONT_SIZE)
+        
+        pygame.display.set_caption(DisplayConfig.CAPTION)
+        
+        return screen, font_text, font_ascii, font_title
+        
+    except pygame.error as e:
+        print(f"Pygame error during initialization: {e}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error initializing Pygame: {e}")
+        raise
 
 # Creación de una clase para manejar el menú principal
 class MainMenu:
@@ -92,74 +122,127 @@ class MainMenu:
 
 
 def main():
-    """Función principal."""
-    screen, font_text, font_ascii, font_title = init_pygame()
-    clock = pygame.time.Clock()
+    """Función principal con manejo de errores."""
+    try:
+        screen, font_text, font_ascii, font_title = init_pygame()
+        clock = pygame.time.Clock()
 
-    main_menu = MainMenu(screen, font_text, font_title, main_menu_sound)
-    mainChar = None
+        main_menu = MainMenu(screen, font_text, font_title, main_menu_sound)
+        mainChar = None
 
-    while True:
-        main_menu.display()
-        action = main_menu.handle_events()
+        while True:
+            main_menu.display()
+            action = main_menu.handle_events()
 
-        if action == "new_game":
-            # Transición suave antes de ir a la creación de personaje
-            fade_out(screen, TransitionConfig.NORMAL_FADE)
-            
-            name = get_character_name(screen, font_text)
-            start_weapon = select_starting_weapon(screen, font_text)
-            main_character = MainCharacter(name)
-            main_character.setWeapon(start_weapon)
-            
-            # Preparar la pantalla de confirmación
-            screen.fill(Colors.BLACK)
-            slow_print(screen, font_text, f"Muy bien {main_character.name}, comenzarás tu aventura con {main_character.weapon['name']}", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
-            pygame.display.flip()
-            time.sleep(2)
-            
-            # Transición al menú del juego
-            fade_out(screen, TransitionConfig.NORMAL_FADE)
-            main_menu_sound.stop()
-            game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
+            if action == "new_game":
+                try:
+                    # Transición suave antes de ir a la creación de personaje
+                    fade_out(screen, TransitionConfig.NORMAL_FADE)
+                    
+                    name = get_character_name(screen, font_text)
+                    start_weapon = select_starting_weapon(screen, font_text)
+                    main_character = MainCharacter(name)
+                    main_character.setWeapon(start_weapon)
+                    
+                    # Preparar la pantalla de confirmación
+                    screen.fill(Colors.BLACK)
+                    slow_print(screen, font_text, f"Muy bien {main_character.name}, comenzarás tu aventura con {main_character.weapon['name']}", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
+                    pygame.display.flip()
+                    time.sleep(2)
+                    
+                    # Transición al menú del juego
+                    fade_out(screen, TransitionConfig.NORMAL_FADE)
+                    main_menu_sound.stop()
+                    game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
+                    
+                except Exception as e:
+                    print(f"Error during new game creation: {e}")
+                    # Return to main menu on error
+                    main_menu_sound.play(-1)
 
-        elif action == "continue":
-            if os.path.exists(GameConfig.SAVE_FILE):
-                # Transición suave antes de cargar
-                fade_out(screen, TransitionConfig.NORMAL_FADE)
+            elif action == "continue":
+                try:
+                    if os.path.exists(GameConfig.SAVE_FILE):
+                        # Transición suave antes de cargar
+                        fade_out(screen, TransitionConfig.NORMAL_FADE)
+                        
+                        screen.fill(Colors.BLACK)
+                        loading_message = "Cargando partida..."
+                        text_surface = font_text.render(loading_message, True, Colors.WHITE)
+                        text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
+                        text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
+                        screen.blit(text_surface, (text_x, text_y))
+                        pygame.display.flip()
+                        time.sleep(1.5)
+                        
+                        main_character = MainCharacter("")
+                        load_success = main_character.load_game()
+                        
+                        if load_success:
+                            # Transición al menú del juego
+                            fade_out(screen, TransitionConfig.NORMAL_FADE)
+                            main_menu_sound.stop()
+                            game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
+                        else:
+                            # Error loading save file
+                            fade_out(screen, TransitionConfig.SHORT_FADE)
+                            screen.fill(Colors.BLACK)
+                            slow_print(screen, font_text, "Error cargando partida. Archivo corrupto o inválido.", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
+                            pygame.display.flip()
+                            time.sleep(3)
+                            fade_out(screen, TransitionConfig.SHORT_FADE)
+                    else:
+                        # Mensaje de error con transición suave
+                        fade_out(screen, TransitionConfig.SHORT_FADE)
+                        screen.fill(Colors.BLACK)
+                        slow_print(screen, font_text, "No hay partida guardada.", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
+                        pygame.display.flip()
+                        time.sleep(2)
+                        fade_out(screen, TransitionConfig.SHORT_FADE)
+                        
+                except Exception as e:
+                    print(f"Error during continue game: {e}")
+                    # Return to main menu on error
+                    fade_out(screen, TransitionConfig.SHORT_FADE)
+                    screen.fill(Colors.BLACK)
+                    slow_print(screen, font_text, "Error inesperado al cargar la partida.", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
+                    pygame.display.flip()
+                    time.sleep(2)
+                    fade_out(screen, TransitionConfig.SHORT_FADE)
+
+            elif action == "quit":
+                fade_out(screen, TransitionConfig.LONG_FADE)
+                pygame.quit()
+                return
                 
-                screen.fill(Colors.BLACK)
-                loading_message = "Cargando partida..."
-                text_surface = font_text.render(loading_message, True, Colors.WHITE)
-                text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
-                text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
-                screen.blit(text_surface, (text_x, text_y))
-                pygame.display.flip()
-                time.sleep(1.5)
-                
-                main_character = MainCharacter("")
-                main_character.load_game()
-                
-                # Transición al menú del juego
-                fade_out(screen, TransitionConfig.NORMAL_FADE)
-                main_menu_sound.stop()
-                game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)
-            else:
-                # Mensaje de error con transición suave
-                fade_out(screen, TransitionConfig.SHORT_FADE)
-                screen.fill(Colors.BLACK)
-                slow_print(screen, font_text, "No hay partida guardada.", MenuConfig.MENU_PADDING, MenuConfig.TITLE_Y_OFFSET)
-                pygame.display.flip()
-                time.sleep(2)
-                fade_out(screen, TransitionConfig.SHORT_FADE)
-
-        elif action == "quit":
-            fade_out(screen, TransitionConfig.LONG_FADE)
+    except KeyboardInterrupt:
+        print("Game interrupted by user")
+        pygame.quit()
+        return
+        
+    except Exception as e:
+        print(f"Critical error in main game loop: {e}")
+        try:
             pygame.quit()
-            return
+        except:
+            pass
+        raise
 
     pygame.quit()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nGame terminated by user")
+    except Exception as e:
+        print(f"\nCritical error: {e}")
+        print("Please report this error if it persists")
+        import traceback
+        traceback.print_exc()
+    finally:
+        try:
+            pygame.quit()
+        except:
+            pass
