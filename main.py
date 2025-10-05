@@ -1,7 +1,7 @@
 import pygame
 import time
 import os
-from src.object.mainChar import MainChar
+from src.object.main_character import MainCharacter
 from levels.start_game import get_character_name, select_starting_weapon
 from src.others import slow_print, resource_path, fade_out, fade_in
 from levels.game_menu import game_menu
@@ -109,7 +109,7 @@ def main():
             
             name = get_character_name(screen, font_text)
             start_weapon = select_starting_weapon(screen, font_text)
-            main_character = MainChar(name)
+            main_character = MainCharacter(name)
             main_character.setWeapon(start_weapon)
             
             # Preparar la pantalla de confirmación
@@ -137,7 +137,7 @@ def main():
                 pygame.display.flip()
                 time.sleep(1.5)
                 
-                main_character = MainChar("")
+                main_character = MainCharacter("")
                 main_character.load_game()
                 
                 # Transición al menú del juego

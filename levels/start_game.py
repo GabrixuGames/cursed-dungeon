@@ -1,6 +1,6 @@
 import pygame
 from src.others import slow_print, draw_text, resource_path
-from src.object.wepons import cargar_armas
+from src.object.weapons import load_weapons
 from config import Colors, MenuConfig, DisplayConfig, FontConfig, TransitionConfig
 
 def get_character_name(screen, font_text, prompt="Introduce el nombre de tu personaje:"):
@@ -57,7 +57,7 @@ def select_starting_weapon(screen, font_text):
     slow_print(screen, font_text, titulo, titulo_x, MenuConfig.TITLE_Y_OFFSET)
 
     try:
-        weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
+        weapons_list = load_weapons(resource_path("src/db/weaponsDb.json"))
         if not weapons_list:
             raise ValueError("La lista de armas está vacía o no se pudo cargar.")
     except Exception as e:

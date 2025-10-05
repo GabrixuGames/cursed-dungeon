@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import random
 import pygame
-from src.object.wepons import cargar_armas
+from src.object.weapons import load_weapons
 from src.others import resource_path, show_popup, fade_out
 from config import Colors, MenuConfig, TransitionConfig
 from config import Colors, MenuConfig, TransitionConfig
@@ -41,7 +41,7 @@ def confirm_purchase(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT):
 def shop(main_character, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
     """Show the shop in the Pygame window."""
     try:
-        weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
+        weapons_list = load_weapons(resource_path("src/db/weaponsDb.json"))
         if not weapons_list:
             raise ValueError("La lista de armas está vacía o no se pudo cargar.")
     except Exception as e:

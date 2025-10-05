@@ -1,7 +1,7 @@
 import pygame, time
 from src.others import slow_print, resource_path, fade_out, show_popup
 from levels.shop import shop
-from levels.levelUp import show_level_up_menu
+from levels.level_up import show_level_up_menu
 from levels.dungeon_combat import dungeon
 from src.animations.animations_game_menu import precalculate_bonfire_frames
 from config import Colors, MenuConfig, TransitionConfig, AudioConfig
@@ -10,7 +10,7 @@ game_menu_sound = pygame.mixer.Sound(resource_path("src\\sounds\\menu_bonfire_so
 game_menu_sound.set_volume(AudioConfig.SFX_VOLUME)
 
 
-def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii_menu):
+def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, font_ascii_menu):
     def mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii_menu, bonfire_frames, current_frame):
         """Dibuja el menú del juego con la opción seleccionada resaltada y la animación."""
         screen.fill(Colors.BLACK)
