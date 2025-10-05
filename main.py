@@ -3,7 +3,7 @@ import time
 import os
 from src.object.mainChar import MainChar
 from levels.start_game import start_game_name, start_game_weapons
-from src.others import slow_print, resource_path
+from src.others import slow_print, resource_path, fade_out, fade_in
 from levels.game_menu import game_menu
 
 
@@ -14,7 +14,7 @@ WINDOW_HEIGHT = 720
 FONT_SIZE = 20
 FPS = 60
 
-main_menu_sound = pygame.mixer.Sound(resource_path("src\sounds\main_menu_entrance.mp3"))
+main_menu_sound = pygame.mixer.Sound(resource_path("src/sounds/main_menu_entrance.mp3"))
 main_menu_sound.set_volume(0.15)  # Ajusta el volumen según sea necesario
 main_menu_sound.play(-1)  # Reproduce el sonido en bucle
 
@@ -38,6 +38,7 @@ class MainMenu:
         self.font_text = font_text
         self.font_title = pygame.font.Font(resource_path("src/assets/fonts/Viking.ttf"), 80)  # Tamaño reducido
         self.main_menu_sound = main_menu_sound
+        self.seleccion = 0
 
     def display(self):
         """Dibuja el menú principal en la pantalla."""
@@ -49,16 +50,17 @@ class MainMenu:
         self.screen.blit(title_surface, (title_x, title_y))
 
         opciones = [
-            "1. Iniciar partida.",
-            "2. Continuar.",
-            "3. Salir."
+            "Iniciar partida",
+            "Continuar",
+            "Salir"
         ]
 
         total_height = len(opciones) * 40
         start_y = (WINDOW_HEIGHT - total_height) // 2
 
         for i, opcion in enumerate(opciones):
-            text_surface = self.font_text.render(opcion, True, (255, 255, 255))
+            color = (255, 255, 0) if i == self.seleccion else (255, 255, 255)
+            text_surface = self.font_text.render(opcion, True, color)
             text_width = text_surface.get_width()
             x = (WINDOW_WIDTH - text_width) // 2
             y = start_y + i * 40
@@ -73,12 +75,17 @@ class MainMenu:
                 pygame.quit()
                 return "quit"
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    return "new_game"
-                elif event.key == pygame.K_2:
-                    return "continue"
-                elif event.key == pygame.K_3:
-                    return "quit"
+                if event.key == pygame.K_UP:
+                    self.seleccion = (self.seleccion - 1) % 3
+                elif event.key == pygame.K_DOWN:
+                    self.seleccion = (self.seleccion + 1) % 3
+                elif event.key == pygame.K_RETURN:
+                    if self.seleccion == 0:
+                        return "new_game"
+                    elif self.seleccion == 1:
+                        return "continue"
+                    elif self.seleccion == 2:
+                        return "quit"
         return None
 
 
@@ -96,19 +103,30 @@ def main():
         action = main_menu.handle_events()
 
         if action == "new_game":
+            # Transición suave antes de ir a la creación de personaje
+            fade_out(screen, 600)
+            
             name = start_game_name(screen, font_text)
             start_weapon = start_game_weapons(screen, font_text)
             mainChar = MainChar(name)
             mainChar.setWeapon(start_weapon)
+            
+            # Preparar la pantalla de confirmación
             screen.fill((0, 0, 0))
             slow_print(screen, font_text, f"Muy bien {mainChar.name}, comenzarás tu aventura con {mainChar.weapon['name']}", 100, 100)
             pygame.display.flip()
             time.sleep(2)
+            
+            # Transición al menú del juego
+            fade_out(screen, 600)
             main_menu_sound.stop()
-            game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)  # Llamar al menú de partida
+            game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)
 
         elif action == "continue":
             if os.path.exists("save.json"):
+                # Transición suave antes de cargar
+                fade_out(screen, 600)
+                
                 screen.fill((0, 0, 0))
                 loading_message = "Cargando partida..."
                 text_surface = font_text.render(loading_message, True, (255, 255, 255))
@@ -117,16 +135,25 @@ def main():
                 screen.blit(text_surface, (text_x, text_y))
                 pygame.display.flip()
                 time.sleep(1.5)
+                
                 mainChar = MainChar("")
                 mainChar.load_game()
+                
+                # Transición al menú del juego
+                fade_out(screen, 600)
                 main_menu_sound.stop()
-                game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)  # Llamar al menú de partida
+                game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_ascii)
             else:
+                # Mensaje de error con transición suave
+                fade_out(screen, 500)
+                screen.fill((0, 0, 0))
                 slow_print(screen, font_text, "No hay partida guardada.", 100, 100)
                 pygame.display.flip()
                 time.sleep(2)
+                fade_out(screen, 500)
 
         elif action == "quit":
+            fade_out(screen, 800)
             pygame.quit()
             return
 

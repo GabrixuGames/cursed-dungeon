@@ -1,5 +1,5 @@
 import pygame, time
-from src.others import slow_print, resource_path
+from src.others import slow_print, resource_path, fade_out
 from levels.shop import shop
 from levels.levelUp import level_up_menu
 from levels.dungeon_combat import dungeon
@@ -59,6 +59,9 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_asc
         frame_timer = 0
         FRAME_DURATION = 600  # ms (ajustado para una animación ligeramente más lenta)
 
+        # Mostrar el menú inicial
+        mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
+
         while True:
             # Procesar eventos de entrada primero para evitar retrasos en la navegación
             for event in pygame.event.get():
@@ -74,17 +77,32 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, mainChar, screen, font_text, font_asc
                         mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
                     elif event.key == pygame.K_RETURN:
                         if seleccion == 0:
+                            fade_out(screen, 600)
                             game_menu_sound.stop()
                             dungeon(mainChar, screen, font_ascii, font_text)
+                            # Al regresar de la mazmorra, restaurar música y mostrar menú
+                            game_menu_sound.play(-1)
+                            mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
                         elif seleccion == 1:
+                            fade_out(screen, 600)
                             shop(mainChar, screen, font_text, screen.get_width(), screen.get_height())
+                            # Al regresar de la tienda, restaurar música y mostrar menú
+                            game_menu_sound.play(-1)
+                            mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
                         elif seleccion == 2:
+                            fade_out(screen, 600)
                             level_up_menu(screen.get_width(), screen.get_height(), mainChar, screen, font_text, font_ascii)
+                            # Al regresar del level up, restaurar música y mostrar menú
+                            game_menu_sound.play(-1)
+                            mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
                         elif seleccion == 3:
-                            mainChar.save_game()
+                            fade_out(screen, 500)
+                            screen.fill((0, 0, 0))
                             slow_print(screen, font_text, "Partida guardada.", 10, 200)
                             pygame.time.wait(2000)
+                            mostrar_menu_juego(screen, font_text, mainChar, opciones, seleccion, font_ascii, bonfire_frames, current_frame)
                         elif seleccion == 4:
+                            fade_out(screen, 800)
                             return True
 
             # Actualizar frame de animación de forma independiente

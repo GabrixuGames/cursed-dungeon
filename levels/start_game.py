@@ -49,7 +49,11 @@ def start_game_weapons(screen, font_text):
     screen.fill((0, 0, 0))
     pygame.display.flip()
 
-    slow_print(screen, font_text, "Selecciona tu arma:", 50, 100)
+    # Centrar el slow_print
+    titulo = "Selecciona tu arma:"
+    titulo_width = len(titulo) * 12.5  # estimación del ancho del carácter usado por slow_print
+    titulo_x = (screen.get_width() - titulo_width) // 2
+    slow_print(screen, font_text, titulo, titulo_x, 100)
 
     try:
         weapons_list = cargar_armas(resource_path("src/db/weaponsDb.json"))
@@ -63,23 +67,41 @@ def start_game_weapons(screen, font_text):
         exit()
 
     weapons_show = weapons_list[:4]
-    opciones = []
+    seleccion = 0
 
-    y_offset = 150
-    for i, weapon in enumerate(weapons_show):
-        texto = f"{i + 1}. {weapon['name']} - Damage: {weapon['damage']} | Speed: {weapon['attack_ratio']}"
-        opciones.append(texto)
-        slow_print(screen, font_text, texto, 50, y_offset)
-        y_offset += 40
+    def mostrar_armas():
+        screen.fill((0, 0, 0))
+        
+        # Título centrado (redibujado)
+        titulo = "Selecciona tu arma:"
+        titulo_surface = font_text.render(titulo, True, (255, 255, 255))
+        titulo_x = (screen.get_width() - titulo_surface.get_width()) // 2
+        screen.blit(titulo_surface, (titulo_x, 100))
+        
+        # Opciones de armas centradas
+        y_offset = 180
+        for i, weapon in enumerate(weapons_show):
+            color = (255, 255, 0) if i == seleccion else (255, 255, 255)
+            texto = f"{weapon['name']} - Damage: {weapon['damage']} | Speed: {weapon['attack_ratio']}"
+            text_surface = font_text.render(texto, True, color)
+            text_x = (screen.get_width() - text_surface.get_width()) // 2
+            screen.blit(text_surface, (text_x, y_offset + i * 50))
+        
+        pygame.display.flip()
 
     seleccionando = True
     while seleccionando:
+        mostrar_armas()
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
-                    index = event.key - pygame.K_1
+                if event.key == pygame.K_UP:
+                    seleccion = (seleccion - 1) % len(weapons_show)
+                elif event.key == pygame.K_DOWN:
+                    seleccion = (seleccion + 1) % len(weapons_show)
+                elif event.key == pygame.K_RETURN:
                     seleccionando = False
-                    return weapons_show[index]
+                    return weapons_show[seleccion]

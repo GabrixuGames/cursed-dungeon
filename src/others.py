@@ -334,3 +334,73 @@ def draw_custom_dungeon(screen, font_ascii, offset):
         while draw_x < screen_width:
             draw_text(screen, font_ascii, line, int(draw_x), y_position, (200, 200, 200))
             draw_x += pattern_px_width
+
+
+def fade_out(screen, duration=800):
+    """Efecto de fade out (desvanecimiento a negro)"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int((elapsed / duration) * 255)
+        alpha = min(255, alpha)  # Asegurar que no supere 255
+        
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS
+
+
+def fade_in(screen, target_surface, duration=800):
+    """Efecto de fade in (aparición gradual desde negro)"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int(255 - (elapsed / duration) * 255)
+        alpha = max(0, alpha)  # Asegurar que no sea menor que 0
+        
+        # Dibujar la superficie objetivo primero
+        screen.blit(target_surface, (0, 0))
+        
+        # Aplicar el fade solo si alpha > 0
+        if alpha > 0:
+            fade_surface.set_alpha(alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS
+    
+    # Asegurar que la imagen final se muestre sin fade
+    screen.blit(target_surface, (0, 0))
+    pygame.display.flip()
+
+
+def menu_fade_in(screen, duration=800):
+    """Efecto de fade in simple para menús"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int(255 - (elapsed / duration) * 255)
+        alpha = max(0, alpha)  # Asegurar que no sea menor que 0
+        
+        # Solo aplicar fade si alpha > 0
+        if alpha > 0:
+            fade_surface.set_alpha(alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS
