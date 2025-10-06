@@ -81,8 +81,8 @@ def dungeon(main_character, screen, font_ascii, font_text_combat):
     enemies_defeated = 0
     inicial_player_health = main_character.getHealth()
     steps_walked = 0
-    # Increase walking range before combat: 40-80 steps
-    steps_until_combat = random.randint(40, 80)
+    # Increase walking range before combat: 999 steps para testing
+    steps_until_combat = random.randint(999, 999)
     offset = 0  # Offset inicial del fondo
     char_offset = 0  # Offset inicial del personaje
 
@@ -129,8 +129,8 @@ def dungeon(main_character, screen, font_ascii, font_text_combat):
 
                     enemies_defeated += 1
                     steps_walked = 0
-                    # reset steps until next combat in the 40-80 range
-                    steps_until_combat = random.randint(40, 80)
+                    # reset steps until next combat: 999 para testing
+                    steps_until_combat = random.randint(999, 999)
 
                     if enemies_defeated == len(enemies_to_defeat):
                         y_offset =+ 30

@@ -39,7 +39,7 @@ class FontConfig:
     # Rutas de fuentes
     MAIN_FONT = "src/assets/fonts/texgyrebonum-regular.otf"
     TITLE_FONT = "src/assets/fonts/Viking.ttf"
-    MONO_FONT = "Courier"  # Fuente del sistema
+    MONO_FONT = "src/assets/fonts/CascadiaCodeNF-Regular.ttf"  # ASCII Art optimizada
     
     # Font rendering constants
     ESTIMATED_CHAR_WIDTH = 12.5

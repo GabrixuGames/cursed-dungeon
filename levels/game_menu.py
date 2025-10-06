@@ -34,11 +34,28 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
 
         # Dibujar opciones del menú alineadas a la izquierda
         for i, opcion in enumerate(opciones):
-            color = Colors.YELLOW if i == seleccion else Colors.WHITE
-            text_surface = font_text.render(opcion, True, color)
-            screen.blit(text_surface, (texto_x, texto_y + i * MenuConfig.OPTION_SPACING))
+            if i == seleccion:
+                # Opción seleccionada: color amarillo, entre > < y ligeramente más grande
+                color = Colors.YELLOW
+                # Crear fuente más grande para la opción seleccionada
+                try:
+                    big_font = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 27)  # Solo 2px más grande que 25
+                except:
+                    big_font = pygame.font.Font(None, 27)
+                
+                # Formatear con el símbolo >
+                formatted_text = f"> {opcion}"
+                text_surface = big_font.render(formatted_text, True, color)
+                # Centrar la opción seleccionada horizontalmente
+                selected_x = texto_x - 10  # Pequeño ajuste hacia la izquierda
+                screen.blit(text_surface, (selected_x, texto_y + i * MenuConfig.OPTION_SPACING - 2))
+            else:
+                # Opciones no seleccionadas: tamaño normal, color blanco
+                color = Colors.WHITE
+                text_surface = font_text.render(opcion, True, color)
+                screen.blit(text_surface, (texto_x, texto_y + i * MenuConfig.OPTION_SPACING))
 
-        # Dibujar línea de controles debajo del menú
+        # Dibujar línea de controles debajo del recuadro
         controls_text = "| ↑/↓ seleccionar | Enter entrar | Esc salir |"
         # Crear fuente más pequeña para los controles
         try:
@@ -47,8 +64,8 @@ def game_menu(WINDOW_WIDTH, WINDOW_HEIGHT, main_character, screen, font_text, fo
             small_font = pygame.font.Font(None, 18)
         
         controls_surface = small_font.render(controls_text, True, Colors.GRAY)
-        controls_x = recuadro_x + (recuadro_width - controls_surface.get_width()) // 2  # Centrado en el recuadro
-        controls_y = recuadro_y + recuadro_height - 30  # 30px desde el borde inferior del recuadro
+        controls_x = recuadro_x + (recuadro_width - controls_surface.get_width()) // 2  # Centrado con el recuadro
+        controls_y = recuadro_y + recuadro_height + 10  # Debajo del recuadro
         screen.blit(controls_surface, (controls_x, controls_y))
 
         # La animación ya está en el tamaño correcto, no necesita escalado

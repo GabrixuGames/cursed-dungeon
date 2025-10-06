@@ -3,7 +3,7 @@ import time
 import os
 from src.object.main_character import MainCharacter
 from levels.start_game import get_character_name, select_starting_weapon
-from src.others import slow_print, resource_path, fade_out, fade_in
+from src.others import slow_print, resource_path, fade_out, fade_in, clear_dungeon_cache
 from levels.game_menu import game_menu
 from config import DisplayConfig, AudioConfig, FontConfig, Colors, MenuConfig, TransitionConfig, GameConfig
 
@@ -17,7 +17,7 @@ from src.input_manager import get_input_manager, get_keyboard_shortcuts, get_hel
 # Configuración de la ventana
 WINDOW_WIDTH = DisplayConfig.WINDOW_WIDTH
 WINDOW_HEIGHT = DisplayConfig.WINDOW_HEIGHT
-FONT_SIZE = FontConfig.SMALL_SIZE
+FONT_SIZE = 28  # Aumentado de FontConfig.SMALL_SIZE para mejor visibilidad
 FPS = DisplayConfig.FPS
 
 # Initialize systems
@@ -58,6 +58,9 @@ def init_pygame():
         # Initialize display manager for performance optimization
         display_manager = init_display_manager(screen)
         
+        # Limpiar caché del dungeon para regenerar con nuevo tamaño
+        clear_dungeon_cache()
+        
         # Load fonts with fallbacks using resource cache
         cache = get_resource_cache()
         try:
@@ -73,9 +76,9 @@ def init_pygame():
             font_title = cache.get_font(None, FontConfig.TITLE_SIZE)
             
         try:
-            font_ascii = cache.get_font(None, FONT_SIZE)  # System font
+            font_ascii = cache.get_font(resource_path(FontConfig.MONO_FONT), FONT_SIZE)  # Cascadia Code
         except Exception:
-            print(f"Warning: Could not load mono font, using default")
+            print(f"Warning: Could not load mono font, using system default")
             font_ascii = cache.get_font(None, FONT_SIZE)
         
         pygame.display.set_caption(DisplayConfig.CAPTION)
@@ -124,12 +127,30 @@ class MainMenu:
         start_y = (WINDOW_HEIGHT - total_height) // 2
 
         for i, opcion in enumerate(opciones):
-            color = Colors.YELLOW if i == self.seleccion else Colors.WHITE
-            text_surface = self.font_text.render(opcion, True, color)
-            text_width = text_surface.get_width()
-            x = (WINDOW_WIDTH - text_width) // 2
-            y = start_y + i * main_menu_spacing
-            self.screen.blit(text_surface, (x, y))
+            if i == self.seleccion:
+                # Opción seleccionada: color amarillo, entre > < y ligeramente más grande
+                color = Colors.YELLOW
+                # Crear fuente más grande para la opción seleccionada
+                try:
+                    big_font = pygame.font.Font(resource_path("src/assets/fonts/texgyrebonum-regular.otf"), 32)
+                except:
+                    big_font = pygame.font.Font(None, 32)
+                
+                # Formatear con el símbolo >
+                formatted_text = f"> {opcion}"
+                text_surface = big_font.render(formatted_text, True, color)
+                text_width = text_surface.get_width()
+                x = (WINDOW_WIDTH - text_width) // 2
+                y = start_y + i * main_menu_spacing - 2  # Pequeño ajuste hacia arriba
+                self.screen.blit(text_surface, (x, y))
+            else:
+                # Opciones no seleccionadas: tamaño normal, color blanco
+                color = Colors.WHITE
+                text_surface = self.font_text.render(opcion, True, color)
+                text_width = text_surface.get_width()
+                x = (WINDOW_WIDTH - text_width) // 2
+                y = start_y + i * main_menu_spacing
+                self.screen.blit(text_surface, (x, y))
 
         # Dibujar línea de controles centrada debajo del menú
         controls_text = "| ↑/↓ seleccionar | Enter entrar | Esc salir |"
@@ -320,6 +341,36 @@ def main():
                     main_character = MainCharacter(name)
                     main_character.setWeapon(start_weapon)
                     
+                    # Animación de carga para nueva partida
+                    screen.fill(Colors.BLACK)
+                    
+                    # Crear fuente más grande para el mensaje de carga
+                    try:
+                        loading_font = pygame.font.Font(resource_path(FontConfig.MAIN_FONT), 50)
+                    except:
+                        loading_font = pygame.font.Font(None, 50)
+                    
+                    # Animación de carga con puntos
+                    loading_base = "Creando aventura"
+                    loading_duration = 1.0
+                    start_time = time.time()
+                    
+                    while time.time() - start_time < loading_duration:
+                        screen.fill(Colors.BLACK)
+                        
+                        # Calcular número de puntos basado en el tiempo
+                        elapsed = time.time() - start_time
+                        dots_count = int((elapsed * 4) % 4)  # 0 a 3 puntos, cambia cada 0.25s
+                        dots = "." * dots_count
+                        
+                        loading_message = loading_base + dots
+                        text_surface = loading_font.render(loading_message, True, Colors.WHITE)
+                        text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
+                        text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
+                        screen.blit(text_surface, (text_x, text_y))
+                        display_manager.update(force=True)
+                        time.sleep(0.1)  # Pequeña pausa para suavizar la animación
+                    
                     # Preparar la pantalla de confirmación
                     screen.fill(Colors.BLACK)
                     
@@ -358,7 +409,6 @@ def main():
                         fade_out(screen, TransitionConfig.NORMAL_FADE)
                         
                         screen.fill(Colors.BLACK)
-                        loading_message = "Cargando partida..."
                         
                         # Crear fuente más grande para el mensaje de carga
                         try:
@@ -366,12 +416,26 @@ def main():
                         except:
                             loading_font = pygame.font.Font(None, 50)
                         
-                        text_surface = loading_font.render(loading_message, True, Colors.WHITE)
-                        text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
-                        text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
-                        screen.blit(text_surface, (text_x, text_y))
-                        display_manager.update(force=True)
-                        time.sleep(1.5)
+                        # Animación de carga con puntos
+                        loading_base = "Cargando partida"
+                        loading_duration = 1.5
+                        start_time = time.time()
+                        
+                        while time.time() - start_time < loading_duration:
+                            screen.fill(Colors.BLACK)
+                            
+                            # Calcular número de puntos basado en el tiempo
+                            elapsed = time.time() - start_time
+                            dots_count = int((elapsed * 4) % 4)  # 0 a 3 puntos, cambia cada 0.25s
+                            dots = "." * dots_count
+                            
+                            loading_message = loading_base + dots
+                            text_surface = loading_font.render(loading_message, True, Colors.WHITE)
+                            text_x = (DisplayConfig.WINDOW_WIDTH - text_surface.get_width()) // 2
+                            text_y = (DisplayConfig.WINDOW_HEIGHT - text_surface.get_height()) // 2
+                            screen.blit(text_surface, (text_x, text_y))
+                            display_manager.update(force=True)
+                            time.sleep(0.1)  # Pequeña pausa para suavizar la animación
                         
                         main_character = MainCharacter("")
                         load_success = main_character.load_game()

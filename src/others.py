@@ -171,7 +171,7 @@ def make_dungeon_surface(font_ascii):
     # Render one repetition of the BACKGROUND to a surface
     sample_line = BACKGROUND[0]
     pattern_px_width = font_ascii.size(sample_line)[0] if sample_line else 800
-    line_height = font_ascii.get_height()
+    line_height = 28  # Fijo para consistencia con draw_custom_dungeon
     surf = pygame.Surface((pattern_px_width, len(BACKGROUND) * line_height), pygame.SRCALPHA)
     for i, line in enumerate(BACKGROUND):
         y = i * line_height
@@ -184,6 +184,11 @@ toast_manager = ToastManager()
 
 # Cached dungeon surface (set to None by default, created lazily)
 _dungeon_surface_cache = None
+
+def clear_dungeon_cache():
+    """Limpiar la superficie del dungeon en caché para forzar regeneración"""
+    global _dungeon_surface_cache
+    _dungeon_surface_cache = None
 
 def get_dungeon_surface(font_ascii):
     global _dungeon_surface_cache
@@ -290,23 +295,37 @@ class CombatMessageBox:
 combat_message_box = CombatMessageBox(margin_bottom=80, height=110)
 
 BACKGROUND = [
-    "-----------------------------------------------",
-    "                                            ",
-    "####  ######    ###########  #####  ### #####",
-    " ###   ##  #     #####  ##    ###    #   ### ",
-    "           #      ##                      # ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "----------------------------------------------",
+    "===============================================",
+    "#                                           #",
+    "#▓▓▓  ▓▓▓▓▓▓    ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓ ▓▓▓▓#",
+    "# ▓▓▓   ▓▓  ▓     ▓▓▓▓▓  ▓▓    ▓▓▓    ▓   ▓▓#",
+    "#          ▓      ▓▓                      ▓ #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "===============================================",
+    "                                             ",
+    "                                             ",
+    "===============================================",
 ]
 
-def draw_custom_dungeon(screen, font_ascii, offset):
+# Elementos dinámicos del fondo - más sutiles y reconocibles
+DYNAMIC_ELEMENTS = {
+    'antorchas': [
+        {'x': 10, 'y': 2, 'frames': ['♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♠']},  # Antorcha en columna izquierda
+        {'x': 35, 'y': 2, 'frames': ['♠', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦']},  # Antorcha en columna derecha
+    ],
+    'gotas_agua': [
+        {'x': 20, 'y': 6, 'frames': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '.']},  # Gota ocasional
+        {'x': 30, 'y': 7, 'frames': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '.']},  # Otra gota
+    ]
+}
+
+def draw_custom_dungeon(screen, font_ascii, offset, frame_counter=0):
     screen_width, screen_height = screen.get_size()
-    line_height = 20
+    line_height = 28  # Aumentado de 20 para mayor tamaño
     background_height = len(BACKGROUND) * line_height
     start_y = (screen_height - background_height) // 2
     # Determinar el ancho en píxeles de una repetición del patrón
@@ -316,24 +335,55 @@ def draw_custom_dungeon(screen, font_ascii, offset):
     # Normalizar offset para hacer wrap
     offset_mod = offset % pattern_px_width if pattern_px_width else 0
 
-    # Try using cached surface for performance
-    dungeon_surf = get_dungeon_surface(font_ascii)
-    if dungeon_surf:
-        surf_w = dungeon_surf.get_width()
-        # draw repeated surfaces to cover screen, using offset_mod
-        x_start = -offset_mod
-        for i in range(-1, int(screen_width / surf_w) + 2):
-            screen.blit(dungeon_surf, (x_start + i * surf_w, start_y))
-        return
-
-    # Fallback: draw lines (slower)
+    # Dibujar fondo base
     for i, line in enumerate(BACKGROUND):
-        # Dibujar suficientes repeticiones empezando en -offset_mod para cubrir la pantalla
+        # Convertir la línea a lista para poder modificarla
+        line_chars = list(line)
         y_position = start_y + i * line_height
+        
+        # Aplicar elementos dinámicos a esta línea
+        for element_type, elements in DYNAMIC_ELEMENTS.items():
+            for element in elements:
+                if element['y'] == i:  # Si el elemento pertenece a esta línea
+                    # Calcular frame actual basado en frame_counter - MUY lento
+                    frame_index = (frame_counter // 60) % len(element['frames'])  # Cambiar cada 60 frames (1 segundo a 60fps)
+                    char = element['frames'][frame_index]
+                    
+                    # Posición ajustada con el offset
+                    char_pos = (element['x'] - int(offset_mod // font_ascii.size('A')[0])) % len(line_chars)
+                    if 0 <= char_pos < len(line_chars):
+                        line_chars[char_pos] = char
+        
+        # Dibujar la línea modificada
+        modified_line = ''.join(line_chars)
         draw_x = -offset_mod
         # Dibujar repetido hasta cubrir la anchura
         while draw_x < screen_width:
-            draw_text(screen, font_ascii, line, int(draw_x), y_position, (200, 200, 200))
+            # Color base del fondo
+            base_color = (200, 200, 200)
+            
+            # Aplicar colores especiales para elementos dinámicos
+            for j, char in enumerate(modified_line):
+                char_x = int(draw_x + j * font_ascii.size('A')[0])
+                char_color = base_color
+                
+                # Colores especiales para elementos dinámicos
+                if char in ['♦']:  # Antorcha encendida
+                    char_color = (255, 180, 80)  # Naranja cálido
+                elif char in ['♠']:  # Antorcha apagada/parpadeando
+                    char_color = (120, 80, 40)  # Marrón oscuro
+                elif char in ['.']:  # Gotas de agua
+                    char_color = (120, 180, 255)  # Azul claro
+                elif char in ['#']:  # Muros principales
+                    char_color = (150, 150, 150)  # Gris claro
+                elif char in ['═']:  # Suelo y techo
+                    char_color = (140, 140, 140)  # Gris medio
+                elif char in ['▓']:  # Columnas y estructuras ornamentales
+                    char_color = (100, 80, 60)  # Marrón piedra
+                
+                if char_x < screen_width and char != ' ':
+                    draw_text(screen, font_ascii, char, char_x, y_position, char_color)
+            
             draw_x += pattern_px_width
 
 
