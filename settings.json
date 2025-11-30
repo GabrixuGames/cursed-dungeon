@@ -1,0 +1,31 @@
+{
+  "audio": {
+    "master_volume": 1.0,
+    "sfx_volume": 0.5,
+    "music_volume": 0.15,
+    "mute": false
+  },
+  "display": {
+    "fullscreen": false,
+    "resolution": [
+      1280,
+      720
+    ],
+    "fps_limit": 60,
+    "vsync": true
+  },
+  "gameplay": {
+    "text_speed": 0.05,
+    "auto_save": true,
+    "skip_animations": false,
+    "show_fps": false
+  },
+  "controls": {
+    "confirm_key": "return",
+    "cancel_key": "escape",
+    "up_key": "up",
+    "down_key": "down",
+    "left_key": "left",
+    "right_key": "right"
+  }
+}

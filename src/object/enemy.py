@@ -77,30 +77,30 @@ class enemy:
     def setState(self, state):
         self.state = state
 
-    def attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
-        mainChar.setHealth(mainChar.getHealth() - self.damage)
-        animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+    def attack(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance, y_offset):
+        main_character.setHealth(main_character.getHealth() - self.damage)
+        animation_enemy_atack(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance)
         return f"{self.name} te ha hecho {self.damage} de daño"
     
-    def evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance, y_offset):
-        animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, mainChar, enemy_instance)
+    def evade(self, screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance, y_offset):
+        animation_enemy_evade(screen, font_text, font_ascii, player_x, player_y, inicial_player_health, hud_enemy_hp, main_character, enemy_instance)
         return f"{self.name} ha esquivado el ataque"
     
-    def apply_state(self, mainChar, screen, font_text, y_offset):
+    def apply_state(self, main_character, screen, font_text, y_offset):
         if self.state:
             # Determine the actual state object (use first if it's a list)
             state_obj = self.state[0] if isinstance(self.state, list) and len(self.state) > 0 else (self.state if isinstance(self.state, dict) else {})
             # Apply the single state object to the main character
-            mainChar.setState(state_obj)
+            main_character.setState(state_obj)
             # State objects in JSON use the key 'state' for the state name (not 'name').
             # Be defensive: accept either 'state' or 'name' and avoid KeyError.
             state_name = state_obj.get('state') or state_obj.get('name') or 'un estado'
             return f"{self.name} te ha afectado con {state_name}."
         return None
 
-def load_enemies(enemyDb, mainChar):
-    lvlmin = mainChar.getLevel() - 4
-    lvlmax = mainChar.getLevel() + 4
+def load_enemies(enemyDb, main_character):
+    lvlmin = main_character.getLevel() - 4
+    lvlmax = main_character.getLevel() + 4
     valid_enemies = []
 
     with open(enemyDb, 'r', encoding='utf-8') as archivo:

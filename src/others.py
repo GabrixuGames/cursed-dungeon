@@ -1,8 +1,9 @@
 import os, time, sys, pygame
+from config import Colors, TransitionConfig, FontConfig, MenuConfig
 
 
 
-def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area=True):
+def slow_print(screen, font_ascii, text, x, y, color=Colors.WHITE, clear_area=True):
     """Draw text char-by-char. Optionally clear the message area first so lines don't overlap.
 
     Clears a horizontal strip starting at x,y using the font height.
@@ -13,10 +14,10 @@ def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area
             text_height = font_ascii.get_height()
             text_width = font_ascii.size(text)[0]
         except Exception:
-            text_height = 20
-            text_width = len(text) * 8
-        clear_rect = (x, y, text_width + 8, text_height + 4)
-        screen.fill((0, 0, 0), clear_rect)
+            text_height = FontConfig.DEFAULT_HEIGHT
+            text_width = len(text) * FontConfig.DEFAULT_CHAR_WIDTH
+        clear_rect = (x, y, text_width + FontConfig.CLEAR_PADDING, text_height + FontConfig.CLEAR_PADDING // 2)
+        screen.fill(Colors.BLACK, clear_rect)
 
     # Inicializa la posición de X
     current_x = x
@@ -24,10 +25,10 @@ def slow_print(screen, font_ascii, text, x, y, color=(255, 255, 255), clear_area
         draw_text(screen, font_ascii, char, current_x, y, color)
         pygame.display.flip()
         current_x += font_ascii.size(char)[0]  # Obtener el ancho real del carácter
-        time.sleep(0.05)
+        time.sleep(TransitionConfig.SLOW_PRINT_DELAY)
 
 
-def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_area=True, timeout=1500, wait_for_key=False, bg_color=(0,0,0,180), border_color=None):
+def blocking_message(screen, font_ascii, text, x, y, color=Colors.WHITE, clear_area=True, timeout=TransitionConfig.MESSAGE_DELAY, wait_for_key=False, bg_color=Colors.BLACK_ALPHA, border_color=None):
     """Type text (using slow_print) and then wait for keypress or timeout (ms).
     Returns when user pressed a key or timeout elapsed.
     """
@@ -37,16 +38,16 @@ def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_
             text_height = font_ascii.get_height()
             text_width = font_ascii.size(text)[0]
         except Exception:
-            text_height = 20
-            text_width = len(text) * 8
-        bg = pygame.Surface((text_width + 12, text_height + 8), pygame.SRCALPHA)
+            text_height = FontConfig.DEFAULT_HEIGHT
+            text_width = len(text) * FontConfig.DEFAULT_CHAR_WIDTH
+        bg = pygame.Surface((text_width + FontConfig.BG_PADDING, text_height + FontConfig.BG_PADDING), pygame.SRCALPHA)
         # Normalize bg_color to RGBA
         if len(bg_color) == 3:
             bg_rgba = (bg_color[0], bg_color[1], bg_color[2], 180)
         else:
             bg_rgba = bg_color
         bg.fill(bg_rgba)
-        screen.blit(bg, (x - 4, y - 2))
+        screen.blit(bg, (x - FontConfig.BG_OFFSET, y - FontConfig.BG_OFFSET // 2))
         # Optional border
         if border_color:
             try:
@@ -67,7 +68,7 @@ def blocking_message(screen, font_ascii, text, x, y, color=(255,255,255), clear_
                 return
         if not wait_for_key and pygame.time.get_ticks() - start >= timeout:
             return
-        pygame.time.wait(20)
+        pygame.time.wait(TransitionConfig.EVENT_CHECK_DELAY)
 
 
 def resource_path(relative_path):
@@ -76,21 +77,21 @@ def resource_path(relative_path):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
-def draw_text(screen, font, text, x, y, color=(255, 255, 255)):
+def draw_text(screen, font, text, x, y, color=Colors.WHITE):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x, y))
 
-def mostrar_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500, height=150):
+def show_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500, height=150):
     # Dibuja un rectángulo semitransparente sobre la pantalla
     popup_surface = pygame.Surface((width, height))
     popup_surface.set_alpha(230)  # Transparencia (0-255)
-    popup_surface.fill((30, 30, 30))  # Color del cuadro
+    popup_surface.fill(Colors.POPUP_BG)  # Color del cuadro
 
     # Borde opcional
-    pygame.draw.rect(popup_surface, (255, 255, 255), popup_surface.get_rect(), 2)
+    pygame.draw.rect(popup_surface, Colors.WHITE, popup_surface.get_rect(), 2)
 
     # Renderiza el texto
-    text_surface = font.render(mensaje, True, (255, 255, 255))
+    text_surface = font.render(mensaje, True, Colors.WHITE)
     text_rect = text_surface.get_rect(center=(width // 2, height // 2))
 
     popup_surface.blit(text_surface, text_rect)
@@ -101,11 +102,11 @@ def mostrar_popup(screen, font, mensaje, WINDOW_WIDTH, WINDOW_HEIGHT, width=500,
     screen.blit(popup_surface, (x, y))
     pygame.display.update()
 
-    time.sleep(2)  # Pausa para mostrar el mensaje
+    time.sleep(TransitionConfig.MESSAGE_DELAY / 1000)  # Pausa para mostrar el mensaje
 
 
 class Toast:
-    def __init__(self, text, duration=1500, color=(255,255,255)):
+    def __init__(self, text, duration=TransitionConfig.MESSAGE_DELAY, color=Colors.WHITE):
         self.text = text
         self.duration = duration
         self.color = color
@@ -118,17 +119,17 @@ class ToastManager:
     def __init__(self):
         self.toasts = []
 
-    def add(self, text, duration=1500):
+    def add(self, text, duration=TransitionConfig.MESSAGE_DELAY):
         t = Toast(text, duration)
         t.start = int(time.time() * 1000)
         self.toasts.append(t)
 
-    def add(self, text, duration=1500, color=(255,255,255)):
+    def add(self, text, duration=TransitionConfig.MESSAGE_DELAY, color=Colors.WHITE):
         t = Toast(text, duration, color)
         t.start = int(time.time() * 1000)
         self.toasts.append(t)
 
-    def draw(self, screen, font, x=50, start_y=520, spacing=22):
+    def draw(self, screen, font, x=MenuConfig.TOAST_X, start_y=MenuConfig.TOAST_START_Y, spacing=MenuConfig.TOAST_SPACING):
         now = int(time.time() * 1000)
         alive = []
         y = start_y
@@ -136,20 +137,20 @@ class ToastManager:
             elapsed = now - t.start
             if elapsed < t.duration:
                 # fade out in last 300ms
-                fade_start = max(0, t.duration - 300)
+                fade_start = max(0, t.duration - TransitionConfig.TOAST_FADE_DURATION)
                 if elapsed >= fade_start:
                     alpha = int(255 * (1 - (elapsed - fade_start) / max(1, t.duration - fade_start)))
                 else:
                     alpha = 255
                 # slide up a bit as it ages
-                t.y_offset = int( -10 * (elapsed / t.duration))
+                t.y_offset = int( -MenuConfig.TOAST_SLIDE_OFFSET * (elapsed / t.duration))
 
                 # render text to surface to support alpha and draw a semi-transparent bg
                 text_surface = font.render(t.text, True, t.color)
                 text_w, text_h = text_surface.get_size()
-                bg_surf = pygame.Surface((text_w + 8, text_h + 4), pygame.SRCALPHA)
+                bg_surf = pygame.Surface((text_w + FontConfig.BG_PADDING, text_h + FontConfig.BG_PADDING // 2), pygame.SRCALPHA)
                 # semi-transparent black background
-                bg_color = (0, 0, 0, 180)
+                bg_color = Colors.BLACK_ALPHA
                 bg_surf.fill(bg_color)
                 # apply fade by multiplying alpha
                 try:
@@ -170,7 +171,7 @@ def make_dungeon_surface(font_ascii):
     # Render one repetition of the BACKGROUND to a surface
     sample_line = BACKGROUND[0]
     pattern_px_width = font_ascii.size(sample_line)[0] if sample_line else 800
-    line_height = font_ascii.get_height()
+    line_height = 28  # Fijo para consistencia con draw_custom_dungeon
     surf = pygame.Surface((pattern_px_width, len(BACKGROUND) * line_height), pygame.SRCALPHA)
     for i, line in enumerate(BACKGROUND):
         y = i * line_height
@@ -183,6 +184,11 @@ toast_manager = ToastManager()
 
 # Cached dungeon surface (set to None by default, created lazily)
 _dungeon_surface_cache = None
+
+def clear_dungeon_cache():
+    """Limpiar la superficie del dungeon en caché para forzar regeneración"""
+    global _dungeon_surface_cache
+    _dungeon_surface_cache = None
 
 def get_dungeon_surface(font_ascii):
     global _dungeon_surface_cache
@@ -289,23 +295,37 @@ class CombatMessageBox:
 combat_message_box = CombatMessageBox(margin_bottom=80, height=110)
 
 BACKGROUND = [
-    "-----------------------------------------------",
-    "                                            ",
-    "####  ######    ###########  #####  ### #####",
-    " ###   ##  #     #####  ##    ###    #   ### ",
-    "           #      ##                      # ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "                                            ",
-    "----------------------------------------------",
+    "===============================================",
+    "#                                           #",
+    "#▓▓▓  ▓▓▓▓▓▓    ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓ ▓▓▓▓#",
+    "# ▓▓▓   ▓▓  ▓     ▓▓▓▓▓  ▓▓    ▓▓▓    ▓   ▓▓#",
+    "#          ▓      ▓▓                      ▓ #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "#                                           #",
+    "===============================================",
+    "                                             ",
+    "                                             ",
+    "===============================================",
 ]
 
-def draw_custom_dungeon(screen, font_ascii, offset):
+# Elementos dinámicos del fondo - más sutiles y reconocibles
+DYNAMIC_ELEMENTS = {
+    'antorchas': [
+        {'x': 10, 'y': 2, 'frames': ['♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♠']},  # Antorcha en columna izquierda
+        {'x': 35, 'y': 2, 'frames': ['♠', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦', '♦']},  # Antorcha en columna derecha
+    ],
+    'gotas_agua': [
+        {'x': 20, 'y': 6, 'frames': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '.']},  # Gota ocasional
+        {'x': 30, 'y': 7, 'frames': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '.']},  # Otra gota
+    ]
+}
+
+def draw_custom_dungeon(screen, font_ascii, offset, frame_counter=0):
     screen_width, screen_height = screen.get_size()
-    line_height = 20
+    line_height = 28  # Aumentado de 20 para mayor tamaño
     background_height = len(BACKGROUND) * line_height
     start_y = (screen_height - background_height) // 2
     # Determinar el ancho en píxeles de una repetición del patrón
@@ -315,22 +335,123 @@ def draw_custom_dungeon(screen, font_ascii, offset):
     # Normalizar offset para hacer wrap
     offset_mod = offset % pattern_px_width if pattern_px_width else 0
 
-    # Try using cached surface for performance
-    dungeon_surf = get_dungeon_surface(font_ascii)
-    if dungeon_surf:
-        surf_w = dungeon_surf.get_width()
-        # draw repeated surfaces to cover screen, using offset_mod
-        x_start = -offset_mod
-        for i in range(-1, int(screen_width / surf_w) + 2):
-            screen.blit(dungeon_surf, (x_start + i * surf_w, start_y))
-        return
-
-    # Fallback: draw lines (slower)
+    # Dibujar fondo base
     for i, line in enumerate(BACKGROUND):
-        # Dibujar suficientes repeticiones empezando en -offset_mod para cubrir la pantalla
+        # Convertir la línea a lista para poder modificarla
+        line_chars = list(line)
         y_position = start_y + i * line_height
+        
+        # Aplicar elementos dinámicos a esta línea
+        for element_type, elements in DYNAMIC_ELEMENTS.items():
+            for element in elements:
+                if element['y'] == i:  # Si el elemento pertenece a esta línea
+                    # Calcular frame actual basado en frame_counter - MUY lento
+                    frame_index = (frame_counter // 60) % len(element['frames'])  # Cambiar cada 60 frames (1 segundo a 60fps)
+                    char = element['frames'][frame_index]
+                    
+                    # Posición ajustada con el offset
+                    char_pos = (element['x'] - int(offset_mod // font_ascii.size('A')[0])) % len(line_chars)
+                    if 0 <= char_pos < len(line_chars):
+                        line_chars[char_pos] = char
+        
+        # Dibujar la línea modificada
+        modified_line = ''.join(line_chars)
         draw_x = -offset_mod
         # Dibujar repetido hasta cubrir la anchura
         while draw_x < screen_width:
-            draw_text(screen, font_ascii, line, int(draw_x), y_position, (200, 200, 200))
+            # Color base del fondo
+            base_color = (200, 200, 200)
+            
+            # Aplicar colores especiales para elementos dinámicos
+            for j, char in enumerate(modified_line):
+                char_x = int(draw_x + j * font_ascii.size('A')[0])
+                char_color = base_color
+                
+                # Colores especiales para elementos dinámicos
+                if char in ['♦']:  # Antorcha encendida
+                    char_color = (255, 180, 80)  # Naranja cálido
+                elif char in ['♠']:  # Antorcha apagada/parpadeando
+                    char_color = (120, 80, 40)  # Marrón oscuro
+                elif char in ['.']:  # Gotas de agua
+                    char_color = (120, 180, 255)  # Azul claro
+                elif char in ['#']:  # Muros principales
+                    char_color = (150, 150, 150)  # Gris claro
+                elif char in ['═']:  # Suelo y techo
+                    char_color = (140, 140, 140)  # Gris medio
+                elif char in ['▓']:  # Columnas y estructuras ornamentales
+                    char_color = (100, 80, 60)  # Marrón piedra
+                
+                if char_x < screen_width and char != ' ':
+                    draw_text(screen, font_ascii, char, char_x, y_position, char_color)
+            
             draw_x += pattern_px_width
+
+
+def fade_out(screen, duration=800):
+    """Efecto de fade out (desvanecimiento a negro)"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int((elapsed / duration) * 255)
+        alpha = min(255, alpha)  # Asegurar que no supere 255
+        
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS
+
+
+def fade_in(screen, target_surface, duration=800):
+    """Efecto de fade in (aparición gradual desde negro)"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int(255 - (elapsed / duration) * 255)
+        alpha = max(0, alpha)  # Asegurar que no sea menor que 0
+        
+        # Dibujar la superficie objetivo primero
+        screen.blit(target_surface, (0, 0))
+        
+        # Aplicar el fade solo si alpha > 0
+        if alpha > 0:
+            fade_surface.set_alpha(alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS
+    
+    # Asegurar que la imagen final se muestre sin fade
+    screen.blit(target_surface, (0, 0))
+    pygame.display.flip()
+
+
+def menu_fade_in(screen, duration=800):
+    """Efecto de fade in simple para menús"""
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < duration:
+        # Calcular el alpha basado en el tiempo transcurrido
+        elapsed = pygame.time.get_ticks() - start_time
+        alpha = int(255 - (elapsed / duration) * 255)
+        alpha = max(0, alpha)  # Asegurar que no sea menor que 0
+        
+        # Solo aplicar fade si alpha > 0
+        if alpha > 0:
+            fade_surface.set_alpha(alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        pygame.time.wait(16)  # ~60 FPS

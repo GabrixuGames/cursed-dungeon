@@ -7,15 +7,21 @@ import os
 sound_path = os.path.join(os.path.dirname(__file__), '..', 'sounds', 'steps_sound.mp3')
 steps_sound = pygame.mixer.Sound(sound_path)
 
-def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset=0):
+def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_health, main_character, offset, char_offset=0):
     screen.fill((0, 0, 0))
-    draw_custom_dungeon(screen, font_ascii, offset)
+    draw_custom_dungeon(screen, font_ascii, offset, 0)  # Sin animación en estado estático
 
     x_char = screen.get_width() // 2 - 300 + char_offset
-    y_char = 380
-    frame_lines = frames_walking_right[0] if isinstance(frames_walking_right[0], list) else frames_walking_right[0].splitlines()
+    # Calcular y_char para que los pies del muñeco estén sobre la línea 12 (igual que en walking)
+    background_height = 14 * 28  # líneas del fondo * line_height
+    start_y_background = (screen.get_height() - background_height) // 2
+    # Los pies deben estar sobre la línea 12, así que el muñeco termina en la línea 12
+    y_char = start_y_background + (12 * 28) - 120  # Ajustado para que los pies estén en línea 12
+    
+    # Usar frame estático (sin efectos para estado idle)
+    frame_lines = frames_walking_right[0].splitlines()
     for i, line in enumerate(frame_lines):
-        draw_text(screen, font_ascii, line, x_char, y_char + i * 20)
+        draw_text(screen, font_ascii, line, x_char, y_char + i * 30)  # Mismo espaciado que walking
 
     # UI positions (fixed) to avoid jumps when text changes
     UI_NAME_X = 50
@@ -23,14 +29,14 @@ def draw_dungeon_static(screen, font_text_combat, font_ascii, inicial_player_hea
     UI_PROMPT_Y = 60
 
     # Show current character health in current/max format
-    draw_text(screen, font_text_combat, f"{mainChar.getName()} - Health: {mainChar.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
+    draw_text(screen, font_text_combat, f"{main_character.getName()} - Health: {main_character.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
     draw_text(screen, font_text_combat, "Press A or D to move through the dungeon.", UI_NAME_X, UI_PROMPT_Y)
 
     pygame.display.flip()
 
 from src.animations.animations import frames_walking_right, frames_walking_left
 
-def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, mainChar, offset, char_offset=0, delay=100, steps_walked=0, steps_until_combat=None, force_steps=0):
+def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health, main_character, offset, char_offset=0, delay=100, steps_walked=0, steps_until_combat=None, force_steps=0):
     clock = pygame.time.Clock()
     running = True
     current_frame = 0
@@ -39,6 +45,14 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
     # steps made during this call
     steps_made = 0
     last_direction = "right"  # Valor inicial para elegir la animación
+    
+    # Sistema de efectos ambientales mejorado (uno a la vez)
+    current_effect = None
+    effect_timer = 0
+    effect_cooldown = 0  # Tiempo de espera entre efectos
+    effect_x = 0
+    effect_y = 0
+    effect_color = (255, 255, 255)
 
     # Maximum character displacement before moving the background (relative to window)
     screen_w = screen.get_width()
@@ -57,11 +71,25 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
     # Grace: allow a couple of frames without keypress before ending walking animation
     no_key_grace = 3
     no_key_frames = 0
+    
+    # Contador para animaciones del fondo
+    frame_counter = 0
 
     steps_sound.play(-1)
 
     while running:
         now = pygame.time.get_ticks()
+        frame_counter += 1  # Incrementar contador de frames
+        
+        # Procesar efectos ambientales independientemente del movimiento
+        import random
+        
+        # Decrementar timers
+        if effect_timer > 0:
+            effect_timer -= 1
+        if effect_cooldown > 0:
+            effect_cooldown -= 1
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 steps_sound.stop()
@@ -123,12 +151,41 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
                             if char_offset > -char_max_offset_extended:
                                 char_offset -= step_player
 
+        # Generar nuevos efectos solo si no hay uno activo y el cooldown ha terminado
+        if effect_timer <= 0 and effect_cooldown <= 0 and random.randint(1, 120) == 1:
+            effect_type = random.choice(['wind', 'wind', 'dust', 'leaves'])
+            effect_timer = 45  # duración del efecto
+            effect_cooldown = random.randint(180, 360)  # cooldown hasta próximo efecto
+            
+            if effect_type == 'wind':
+                wind_patterns = ["~", "~~", "~~~", "~~~~"]
+                current_effect = random.choice(wind_patterns)
+                effect_x = random.randint(100, screen.get_width() - 200)
+                effect_y = random.randint(100, 300)
+                effect_color = (200, 200, 255)
+            elif effect_type == 'dust':
+                dust_patterns = [".", "..", "...", "° °", "· ·"]
+                current_effect = random.choice(dust_patterns)
+                effect_x = random.randint(100, screen.get_width() - 200)
+                effect_y = random.randint(400, screen.get_height() - 100)
+                effect_color = (139, 129, 76)
+            else:  # leaves
+                leaf_patterns = ["*", "o", "°", "·"]
+                current_effect = random.choice(leaf_patterns)
+                effect_x = random.randint(100, screen.get_width() - 200)
+                effect_y = random.randint(200, 400)
+                effect_color = (34, 139, 34)
+
         # Draw background and character
         screen.fill((0, 0, 0))
-        draw_custom_dungeon(screen, font_ascii, offset)
+        draw_custom_dungeon(screen, font_ascii, offset, frame_counter)
 
         x_char = screen.get_width() // 2 - 300 + char_offset
-        y_char = 380
+        # Calcular y_char para que los pies del muñeco estén sobre la línea 12
+        background_height = 14 * 28  # líneas del fondo * line_height
+        start_y_background = (screen.get_height() - background_height) // 2
+        # Los pies deben estar sobre la línea 12, así que el muñeco termina en la línea 12
+        y_char = start_y_background + (12 * 28) - 120  # Ajustado para que los pies estén en línea 12
 
         # Select appropriate frames according to direction
         if last_direction == "right":
@@ -139,8 +196,21 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
         if not isinstance(frame_lines, list):
             frame_lines = frame_lines.splitlines()
 
+        # Dibujar el personaje con espaciado vertical generoso
         for i, line in enumerate(frame_lines):
-            draw_text(screen, font_ascii, line, x_char, y_char + i * 20)
+            draw_text(screen, font_ascii, line, x_char, y_char + i * 30)  # Aumentado de 25 a 30
+        
+        # Dibujar efecto activo
+        if current_effect and effect_timer > 0:
+            # Las hojas se mueven lentamente
+            if effect_color == (34, 139, 34):  # Es una hoja
+                effect_x += 0.5  # Movimiento sutil
+            
+            draw_text(screen, font_ascii, current_effect, int(effect_x), int(effect_y), effect_color)
+        
+        # Limpiar efecto cuando termine
+        if effect_timer <= 0:
+            current_effect = None
 
         # Ensure char_offset stays within extended range
         if char_offset > char_max_offset_extended:
@@ -154,7 +224,7 @@ def dungeon_walking(screen, font_text_combat, font_ascii, inicial_player_health,
         UI_PROMPT_Y = 60
 
         # Always show the name and current health while walking
-        draw_text(screen, font_text_combat, f"{mainChar.getName()} - Health: {mainChar.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
+        draw_text(screen, font_text_combat, f"{main_character.getName()} - Health: {main_character.getHealth()}/{inicial_player_health} HP", UI_NAME_X, UI_NAME_Y)
         # Show the prompt in the same position as static state for consistency
         draw_text(screen, font_text_combat, "Press A or D to move through the dungeon.", UI_NAME_X, UI_PROMPT_Y)
 
