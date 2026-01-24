@@ -22,6 +22,7 @@ class Colors:
     BLUE = (0, 0, 255)
     GRAY = (200, 200, 200)  # Bordes de menús
     LIGHT_GRAY = (200, 200, 200)
+    DARK_GRAY = (100, 100, 100)  # Para elementos deshabilitados
     
     # Colores de UI
     POPUP_BG = (30, 30, 30)

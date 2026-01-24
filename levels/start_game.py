@@ -115,6 +115,8 @@ def select_starting_weapon(screen, font_text):
                         # Dar items iniciales al jugador
                         inventory.add_item("hp_potion_small", 3)
                         inventory.add_item("mp_potion_small", 2)
+                        inventory.add_item("antidote", 1)
+                        inventory.add_item("bomb", 1)
                     except Exception as e:
                         print(f"Advertencia: No se pudo inicializar inventario: {e}")
                     

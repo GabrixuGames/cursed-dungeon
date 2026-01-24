@@ -1,88 +1,353 @@
 # workflow.md - Flujo de Trabajo del Equipo
 
-## 1. Inicio de Proyecto
-1. **PM** recibe requisitos y crea brief del proyecto
-2. **PM** define alcance, prioridades y timeline
-3. **Designer** propone wireframes y mockups iniciales
-4. **FullstackDev** revisa viabilidad técnica
-5. Reunión de kick-off con todos los agentes
+## 🎮 Desarrollo Ágil para Videojuegos
 
-## 2. Fase de Diseño
-1. **Designer** crea diseño detallado (UI/UX)
-2. **FrontendSenior** revisa accesibilidad y factibilidad
-3. **Designer** ajusta según feedback
-4. **PM** aprueba diseño final
+### Filosofía de Desarrollo
+- **Iteración rápida**: Prototipar, probar, iterar
+- **Priorizar diversión**: Si no es divertido, no sirve
+- **Feedback constante**: Playtesting frecuente
+- **Documentar decisiones**: Mantener histórico de cambios
 
-## 3. Fase de Desarrollo
+---
 
-### Backend
-1. **BackendSenior** define arquitectura y estructura de datos
-2. **BackendJunior** implementa endpoints y lógica
-3. **BackendSenior** revisa código y optimiza
-4. **QA** realiza tests de API
+## 📅 Ciclo de Desarrollo (Sprints de 1-2 semanas)
 
-### Frontend
-1. **FrontendSenior** define estructura de componentes
-2. **FrontendJunior** implementa UI según diseño
-3. **FrontendSenior** revisa y optimiza performance
-4. **QA** realiza tests de interfaz
+### 1. Sprint Planning
+**Participantes**: PM, GameDevSenior, Designer  
+**Duración**: 1-2 horas
 
-### Integración
-1. **FullstackDev** coordina integración frontend-backend
-2. **FullstackDev** resuelve problemas de comunicación entre capas
-3. **QA** realiza tests de integración end-to-end
+1. **PM** define objetivos del sprint
+2. **GameDevSenior** evalúa viabilidad técnica
+3. **Designer** propone mejoras de UX/feel
+4. Equipo selecciona features a implementar
+5. Se asignan tareas según especialidad
 
-## 4. Fase de Testing
-1. **QA** ejecuta plan de pruebas completo
-2. **QA** reporta bugs a los desarrolladores correspondientes
-3. Desarrolladores corrigen issues
-4. **QA** valida correcciones
-5. Ciclo se repite hasta aprobación
+**Output**: Lista priorizada de tareas en plan de sprint
 
-## 5. Fase de Documentación
-1. **DocWriter** documenta APIs y endpoints
-2. **DocWriter** crea guías de usuario
-3. **DocWriter** genera README y docs técnicas
-4. **PM** revisa que la documentación esté completa
+---
 
-## 6. Fase de Despliegue
-1. **DevOps** prepara entorno de staging
-2. **QA** valida en staging
-3. **DevOps** configura CI/CD pipeline
-4. **DevOps** despliega a producción
-5. **PM** monitorea lanzamiento
-6. **DevOps** configura monitoreo y alertas
+### 2. Desarrollo Iterativo
 
-## 7. Mantenimiento Post-Lanzamiento
-1. **DevOps** monitorea métricas y logs
-2. **QA** valida reportes de usuarios
-3. Desarrolladores aplican hotfixes si es necesario
-4. **PM** prioriza nuevas features/mejoras
+#### Día 1-2: Implementación Core
+- **GameDevJunior**: Implementa mecánicas básicas
+- **FrontendJunior**: Crea UI necesaria
+- **BackendJunior**: Configura sistemas de datos
+- **Daily standup**: 15 min al inicio del día
 
-## Ciclos de Revisión
+#### Día 3-4: Integración y Pulido
+- **FullstackDev**: Integra todos los sistemas
+- **GameDevSenior**: Revisa y optimiza código
+- **FrontendSenior**: Mejora rendering y animaciones
+- **Designer**: Ajusta feedback visual
 
-### Daily
-- Quick sync de avances entre agentes activos
-- Identificación de blockers
+#### Día 5-6: Testing y Balanceo
+- **QA**: Ejecuta tests y playtesting
+- **QA**: Documenta bugs encontrados
+- **GameDevSenior**: Balancea mecánicas según feedback
+- Desarrolladores corrigen bugs críticos
 
-### Semanal
-- **PM** revisa progreso general
-- **Seniors** revisan código de juniors
-- **QA** reporta estado de testing
+#### Día 7: Review y Retrospectiva
+- **PM**: Sprint review con demos
+- Equipo evalúa: ¿Es divertido? ¿Funciona bien?
+- Retrospectiva: ¿Qué mejorar?
+- **DocWriter**: Actualiza documentación
 
-### Por Feature
-- Code review obligatorio por senior correspondiente
-- Aprobación de **PM** antes de merge
-- Validación de **QA** antes de considerar completado
+---
 
-## Gestión de Cambios
-1. Cambios menores: aprobación de senior del área
-2. Cambios mayores: aprobación de **PM** y **FullstackDev**
-3. Cambios de arquitectura: reunión con todos los seniors
-4. Todos los cambios deben documentarse
+## 🔄 Flujo de Trabajo por Feature
 
-## Resolución de Conflictos
-1. Desarrolladores intentan resolver técnicamente
-2. Si persiste, escala a **FullstackDev**
-3. Si impacta scope/timeline, escala a **PM**
-4. **PM** tiene decisión final en caso de empate
+### Implementación de Nueva Mecánica
+
+```
+1. PM define requisitos
+   ↓
+2. Designer propone feedback visual/audio
+   ↓
+3. GameDevSenior diseña arquitectura
+   ↓
+4. GameDevJunior implementa código base
+   ↓
+5. FrontendJunior añade UI necesaria
+   ↓
+6. FullstackDev integra sistemas
+   ↓
+7. QA testea y reporta bugs
+   ↓
+8. GameDevSenior revisa y optimiza
+   ↓
+9. Designer ajusta game feel
+   ↓
+10. QA valida fixes
+    ↓
+11. PM aprueba feature
+    ↓
+12. DocWriter documenta
+```
+
+### Corrección de Bug
+
+```
+1. QA descubre y documenta bug
+   ↓
+2. PM prioriza (crítico/alto/medio/bajo)
+   ↓
+3. Developer correspondiente investiga
+   ↓
+4. Developer implementa fix
+   ↓
+5. QA valida que bug está resuelto
+   ↓
+6. Senior revisa si es cambio mayor
+```
+
+---
+
+## 🎯 Prioridades de Desarrollo
+
+### Orden de Importancia
+
+1. **Diversión / Game Feel**
+   - ¿Es satisfactorio jugar?
+   - ¿Hay feedback visual/audio inmediato?
+   - ¿Se siente responsive?
+
+2. **Funcionalidad Core**
+   - Mecánicas principales funcionan
+   - Sin crashes o game-breaking bugs
+   - Save/Load funciona correctamente
+
+3. **Performance**
+   - 60 FPS consistente
+   - Tiempos de carga aceptables
+   - Sin memory leaks
+
+4. **Pulido Visual**
+   - Animaciones suaves
+   - Efectos de partículas
+   - Transiciones fluidas
+
+5. **Features Secundarias**
+   - Logros y achievements
+   - Estadísticas detalladas
+   - Opciones avanzadas
+
+---
+
+## 📋 Dailyalización
+
+### Daily Standup (10-15 minutos)
+**Hora**: Inicio del día de trabajo  
+**Formato**: Cada agente responde:
+
+1. **¿Qué hice ayer?**
+2. **¿Qué haré hoy?**
+3. **¿Tengo algún blocker?**
+
+**PM** anota blockers y coordina soluciones
+
+### Playtesting Sessions (30-60 minutos, 2-3 veces por semana)
+**Participantes**: Todo el equipo
+
+1. Jugar la build actual
+2. Anotar: bugs, feedback, ideas
+3. Discutir: ¿Qué funciona? ¿Qué no?
+4. **PM** prioriza cambios basados en feedback
+
+### Code Review (continuo)
+- Seniors revisan código de juniors en máximo 24h
+- Feedback constructivo y educativo
+- Aprobación requerida antes de merge
+
+---
+
+## 🔧 Gestión de Cambios
+
+### Cambios Menores (< 1 hora de trabajo)
+- Aprobación del **Senior** del área
+- Implementar directamente
+- Actualizar documentación si aplica
+
+### Cambios Medianos (1-4 horas)
+- Discusión con **FullstackDev**
+- Evaluación de impacto en otros sistemas
+- Aprobación de **PM** si afecta scope
+
+### Cambios Mayores (> 4 horas)
+- Reunión con **PM** y **Seniors**
+- Evaluación de:
+  - Impacto en timeline
+  - Recursos necesarios
+  - Beneficio vs costo
+- **PM** toma decisión final
+
+### Cambios de Arquitectura
+- Reunión de equipo completo
+- **GameDevSenior** presenta propuesta
+- Evaluación de pros/cons
+- Votación si es necesario
+- **PM** tiene veto en caso de empate
+
+---
+
+## 🐛 Gestión de Bugs
+
+### Severidad
+
+**Crítico** (Fix inmediato)
+- Game crashes
+- Data corruption
+- Unplayable states
+
+**Alto** (Fix en 1-2 días)
+- Mecánicas no funcionan correctamente
+- Exploits importantes
+- Performance severa (< 30 FPS)
+
+**Medio** (Fix en sprint actual)
+- Bugs visuales molestos
+- Balanceo incorrecto
+- UX confusa
+
+**Bajo** (Backlog)
+- Bugs estéticos menores
+- Edge cases raros
+- Nice-to-have features
+
+### Proceso
+
+1. **QA** crea reporte detallado
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Screenshots/logs si aplica
+
+2. **PM** asigna severidad y developer
+
+3. Developer investiga y corrige
+
+4. **QA** valida fix
+
+5. **PM** cierra ticket
+
+---
+
+## 🚀 Release Checklist
+
+### Pre-Release (1 semana antes)
+
+- [ ] **QA**: Todos los tests pasan
+- [ ] **QA**: Playtesting completo sin bugs críticos
+- [ ] **GameDevSenior**: Performance aceptable (60 FPS)
+- [ ] **PM**: Features planificadas completadas
+- [ ] **DocWriter**: Documentación actualizada
+- [ ] **DevOps**: Build de release creado y testeado
+
+### Release Day
+
+- [ ] **PM**: Aprobación final
+- [ ] **DevOps**: Deploy a producción
+- [ ] **DocWriter**: Actualizar CHANGELOG.md
+- [ ] **PM**: Comunicar release
+- [ ] Equipo monitorea feedback inicial
+
+### Post-Release (1 semana después)
+
+- [ ] **QA**: Monitorear reportes de usuarios
+- [ ] **PM**: Analizar feedback
+- [ ] **GameDevSenior**: Revisar métricas de performance
+- [ ] Equipo planifica hotfixes si es necesario
+- [ ] Retrospectiva de release
+
+---
+
+## 🤝 Colaboración entre Agentes
+
+### Interacciones Comunes
+
+**PM ↔️ Todos**
+- Define prioridades
+- Resuelve conflictos
+- Aprueba cambios mayores
+
+**GameDevSenior ↔️ GameDevJunior**
+- Code review
+- Mentorship técnico
+- Arquitectura de sistemas
+
+**FrontendSenior ↔️ FrontendJunior**
+- Optimización de rendering
+- Implementación de animaciones
+- UI/UX best practices
+
+**FullstackDev ↔️ Todos**
+- Integración de sistemas
+- Resolución de dependencias
+- Coordinación técnica
+
+**Designer ↔️ Developers**
+- Especificación de UI/UX
+- Feedback de implementación
+- Iteración de game feel
+
+**QA ↔️ Developers**
+- Reporte de bugs
+- Validación de fixes
+- Sugerencia de tests
+
+**DocWriter ↔️ Todos**
+- Documentación de features
+- Actualización de guías
+- Clarificación de procesos
+
+---
+
+## 📞 Resolución de Conflictos
+
+### Nivel 1: Entre Desarrolladores
+- Discusión técnica directa
+- Buscar consenso mediante código
+- Si no se resuelve → Escalar
+
+### Nivel 2: Senior del Área
+- **FrontendSenior** para temas de UI
+- **GameDevSenior** para mecánicas
+- **BackendSenior** para datos/APIs
+- Si no se resuelve → Escalar
+
+### Nivel 3: FullstackDev
+- Evalúa impacto en sistema completo
+- Propone solución técnica
+- Si afecta scope → Escalar
+
+### Nivel 4: PM
+- Toma decisión basada en:
+  - Impacto en timeline
+  - Beneficio para el juego
+  - Recursos disponibles
+- Decisión es final
+
+---
+
+## 📊 Métricas de Éxito
+
+### Por Sprint
+- Features completadas vs planificadas
+- Bugs encontrados y resueltos
+- Cobertura de tests
+- Satisfacción del equipo (encuesta)
+
+### Por Release
+- Performance (FPS promedio)
+- Crash rate
+- User feedback (si aplicable)
+- Tiempo de desarrollo vs estimado
+
+### A Largo Plazo
+- Velocidad del equipo (story points/sprint)
+- Calidad del código (deuda técnica)
+- Moral del equipo
+- Cumplimiento de roadmap
+
+---
+
+**Última actualización**: Enero 2026 - v0.5  
+**Revisado por**: PM

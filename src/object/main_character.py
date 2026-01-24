@@ -2,6 +2,7 @@ import pygame
 from src.others import slow_print, toast_manager
 import time, json, os
 from src.animations.animations import animation_player_atack, animation_player_evade, animation_victory
+from src.achievement_system import AchievementManager
 
 
 class MainCharacter:
@@ -24,9 +25,25 @@ class MainCharacter:
         # Sistemas adicionales
         self.inventory_manager = None  # Se inicializará cuando sea necesario
         self.skill_manager = None  # Se inicializa en start_game o load_game
+        self.achievement_manager = AchievementManager()  # Sistema de logros
         self._active_buffs = []  # Buffs temporales activos
         self._auto_revive = None  # Efecto de Pluma de Fénix
         self._guaranteed_flee = False  # Efecto de Cuerda de Escape
+        
+        # Estadísticas para achievements
+        self.stats = {
+            "enemies_defeated": 0,
+            "consecutive_dodges": 0,
+            "low_hp_kills": 0,
+            "flawless_combats": 0,
+            "shop_visits": 0,
+            "steps_walked": 0,
+            "comeback_wins": 0,
+            "states_applied": 0,
+            "skills_used": 0,
+            "items_used": 0,
+            "flee_count": 0
+        }
     
     # Properties
     @property
@@ -60,6 +77,14 @@ class MainCharacter:
     @health.setter
     def health(self, value):
         self._health = max(0, value)
+    
+    @property
+    def max_health(self):
+        return self._max_health
+    
+    @max_health.setter
+    def max_health(self, value):
+        self._max_health = value
     
     @property
     def evade_chance(self):
@@ -186,6 +211,10 @@ class MainCharacter:
             self.level = self.level + 1
             self.atributes = self.atributes + 3
             self.experience = 0
+            
+            # TRACKING: Level up achievement
+            self.track_level_up()
+            
             # Use blocking_message so the level-up messages appear typed and wait for user input
             # Use the combat message box for typed messages with fallback
             from src.others import combat_message_box, blocking_message
@@ -270,7 +299,9 @@ class MainCharacter:
                 "weapon": self.weapon,
                 "to_next_level": self.to_next_level,
                 "inventory": self.inventory_manager.to_dict() if self.inventory_manager else None,
-                "skill_manager": self.skill_manager.to_dict() if self.skill_manager else None
+                "skill_manager": self.skill_manager.to_dict() if self.skill_manager else None,
+                "stats": self.stats if hasattr(self, 'stats') else {},  # NUEVO: Stats para achievements
+                "achievement_progress": self.achievement_manager.to_dict() if hasattr(self, 'achievement_manager') else {}  # NUEVO: Progreso de achievements
             }
             
             save_manager = get_save_manager()
@@ -317,12 +348,45 @@ class MainCharacter:
                 from src.inventory_system import get_inventory_manager
                 self.inventory_manager = get_inventory_manager()
                 self.inventory_manager.from_dict(character_data["inventory"])
+            else:
+                # Inicializar inventario vacío si no existe en el save
+                from src.inventory_system import get_inventory_manager
+                self.inventory_manager = get_inventory_manager()
             
             # Cargar skill_manager si existe
             if character_data.get("skill_manager"):
-                from src.skill_system import get_skill_manager
-                self.skill_manager = get_skill_manager()
+                from src.skill_system import SkillManager
+                self.skill_manager = SkillManager()
                 self.skill_manager.from_dict(character_data["skill_manager"])
+            else:
+                # Inicializar skill_manager si no existe en el save
+                from src.skill_system import SkillManager
+                self.skill_manager = SkillManager()
+                # No llamar a initialize() porque no existe ese método
+            
+            # NUEVO: Cargar stats para achievements
+            if character_data.get("stats"):
+                self.stats = character_data["stats"]
+            else:
+                # Inicializar stats vacíos si no existen
+                self.stats = {
+                    "enemies_defeated": 0,
+                    "consecutive_dodges": 0,
+                    "low_hp_kills": 0,
+                    "flawless_combats": 0,
+                    "shop_visits": 0,
+                    "steps_walked": 0,
+                    "comeback_wins": 0,
+                    "states_applied": 0,
+                    "skills_used": 0,
+                    "items_used": 0,
+                    "flee_count": 0
+                }
+            
+            # NUEVO: Cargar progreso de achievements
+            if character_data.get("achievement_progress"):
+                if hasattr(self, 'achievement_manager'):
+                    self.achievement_manager.from_dict(character_data["achievement_progress"])
             
             return True
             
@@ -476,3 +540,83 @@ class MainCharacter:
         except Exception as e:
             print(f"Unexpected error loading save: {e}")
             return False
+    
+    # ========== MÉTODOS DE ACHIEVEMENT TRACKING ==========
+    
+    def track_enemy_defeat(self):
+        """Trackea la derrota de un enemigo y verifica achievements."""
+        self.stats["enemies_defeated"] += 1
+        
+        # Verificar si fue con poca vida
+        hp_percent = (self.health / self.max_health) * 100
+        if hp_percent < 10:
+            self.stats["low_hp_kills"] += 1
+        
+        # Verificar achievements
+        unlocked = []
+        unlocked.extend(self.achievement_manager.update_progress("enemies_defeated", self.stats["enemies_defeated"]))
+        unlocked.extend(self.achievement_manager.update_progress("low_hp_kills", self.stats["low_hp_kills"]))
+        
+        # Mostrar notificaciones
+        for achievement_id in unlocked:
+            achievement = self.achievement_manager.get_achievement(achievement_id)
+            if achievement:
+                toast_manager.add(f"🏆 Logro: {achievement.name}!", color=(255, 215, 0))
+                # Dar recompensa
+                if achievement.reward["type"] == "gold":
+                    self.money += achievement.reward["amount"]
+                    toast_manager.add(f"+{achievement.reward['amount']} oro", color=(255, 215, 0))
+                elif achievement.reward["type"] == "exp":
+                    self.experience += achievement.reward["amount"]
+                    toast_manager.add(f"+{achievement.reward['amount']} EXP", color=(100, 255, 100))
+    
+    def track_dodge(self):
+        """Trackea una esquiva exitosa."""
+        self.stats["consecutive_dodges"] += 1
+        
+        # Verificar achievement de esquivas consecutivas
+        unlocked = self.achievement_manager.update_progress("consecutive_dodges", self.stats["consecutive_dodges"])
+        for achievement_id in unlocked:
+            achievement = self.achievement_manager.get_achievement(achievement_id)
+            if achievement:
+                toast_manager.add(f"🏆 Logro: {achievement.name}!", color=(255, 215, 0))
+    
+    def reset_dodge_streak(self):
+        """Reinicia el contador de esquivas consecutivas."""
+        self.stats["consecutive_dodges"] = 0
+    
+    def track_flawless_combat(self, initial_hp: int):
+        """Verifica si fue un combate perfecto (sin recibir daño)."""
+        if self.health >= initial_hp:
+            self.stats["flawless_combats"] += 1
+            unlocked = self.achievement_manager.update_progress("flawless_combat", 1)
+            for achievement_id in unlocked:
+                achievement = self.achievement_manager.get_achievement(achievement_id)
+                if achievement:
+                    toast_manager.add(f"🏆 Logro: {achievement.name}!", color=(255, 215, 0))
+    
+    def track_skill_use(self):
+        """Trackea el uso de una habilidad."""
+        self.stats["skills_used"] += 1
+    
+    def track_item_use(self):
+        """Trackea el uso de un item."""
+        self.stats["items_used"] += 1
+    
+    def track_flee(self):
+        """Trackea una huida."""
+        self.stats["flee_count"] += 1
+    
+    def track_state_applied(self):
+        """Trackea la aplicación de un estado alterado."""
+        self.stats["states_applied"] += 1
+        unlocked = self.achievement_manager.update_progress("states_applied", self.stats["states_applied"])
+    
+    def track_shop_visit(self):
+        """Trackea una visita a la tienda."""
+        self.stats["shop_visits"] += 1
+        unlocked = self.achievement_manager.update_progress("shop_visits", self.stats["shop_visits"])
+    
+    def track_level_up(self):
+        """Trackea subidas de nivel para achievements."""
+        unlocked = self.achievement_manager.update_progress("level", self.level)

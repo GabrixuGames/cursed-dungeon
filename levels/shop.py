@@ -52,6 +52,9 @@ def shop(main_character, screen, font, WINDOW_WIDTH, WINDOW_HEIGHT):
         WINDOW_WIDTH: Window width
         WINDOW_HEIGHT: Window height
     """
+    # TRACKING: Shop visit
+    main_character.track_shop_visit()
+    
     # Cargar armas
     try:
         weapons_list = load_weapons(resource_path("src/db/weaponsDb.json"))

@@ -324,6 +324,224 @@ surface_cache = {}
 
 ---
 
+## 🎨 Sistema de Animaciones (ASCII Art)
+
+### ⚠️ Filosofía: Arte ASCII
+
+Este proyecto utiliza **arte ASCII** para toda la representación visual.
+
+**Personajes y enemigos** se renderizan con caracteres, NO con sprites PNG.
+
+### Estructura de Animaciones
+
+```
+src/animations/
+├── animations.py           # Sistema base de animaciones ASCII
+├── animations_game_menu.py # Animaciones del menú (bonfire ASCII)
+├── new_animations.py       # Sistema modular
+└── walking.py             # Animaciones de movimiento
+```
+
+### Cómo Funciona
+
+```python
+# Basado en src/animations/animations.py del proyecto
+
+def draw_character(screen, font_ascii, x, y, character, color=(255, 255, 255)):
+    """Renderiza arte ASCII multi-línea."""
+    for i, line in enumerate(character):
+        text_surface = font_ascii.render(line, True, color)
+        screen.blit(text_surface, (x, y + i * 20))
+
+# Definir personajes ASCII
+PLAYER_IDLE = [
+    "  O  ",
+    " /|\\ ",
+    " / \\ "
+]
+
+PLAYER_ATTACK = [
+    "  O  ",
+    " /|--",  # Brazo extendido
+    " / \\ "
+]
+
+# Animación de ataque
+def animation_player_attack(screen, font_text, font_ascii, x, y, ...):
+    frames = [PLAYER_IDLE, PLAYER_ATTACK, PLAYER_IDLE]
+    
+    for frame in frames:
+        draw_character(screen, font_ascii, x, y, frame)
+        pygame.display.flip()
+        time.sleep(0.1)
+```
+
+### Uso Real del Proyecto
+
+```python
+# Importar desde módulo actual
+from src.animations.animations import animation_player_attack, draw_character
+
+# En combate
+animation_player_attack(
+    screen, font_text, font_ascii,
+    player_x, player_y,
+    player_hp, enemy_hp,
+    player, enemy
+)
+```
+
+### Texto con Efecto de Escritura
+
+```python
+# Basado en src/others.py
+from src.others import slow_print, blocking_message
+
+# Escribir texto carácter por carácter
+slow_print(screen, font_ascii, "¡Ataque crítico!", x, y, color=(255, 0, 0))
+
+# Mensaje que espera input
+blocking_message(screen, font, "Presiona una tecla...", x, y,
+                timeout=2000, wait_for_key=True)
+frame = anim_mgr.get_frame("player_walk")
+screen.blit(frame, (x, y))
+```
+
+### Animaciones de Menú
+
+```python
+from src.animations.animations_game_menu import bonfire_animation
+
+# Crear animación de bonfire
+frames = bonfire_animation(font, size=(200, 200))
+
+# En game loop
+current_frame = frames[frame_index % len(frames)]
+screen.blit(current_frame, (x, y))
+```
+
+---
+
+## 🎵 Sistema de Audio
+
+### Estructura de Audio
+
+```
+src/sounds/
+├── combat/          # Sonidos de combate
+│   ├── hit.wav
+│   ├── miss.wav
+│   └── critical.wav
+├── ui/              # Sonidos de interfaz
+│   ├── click.wav
+│   ├── hover.wav
+│   └── error.wav
+└── music/           # Música de fondo
+    ├── menu.ogg
+    └── battle.ogg
+```
+
+### Implementar Audio Manager (Pendiente)
+
+```python
+import pygame
+
+class AudioManager:
+    """Gestor centralizado de audio del juego."""
+    
+    def __init__(self):
+        pygame.mixer.init()
+        self.sounds = {}
+        self.music_volume = 0.7
+        self.sfx_volume = 0.8
+    
+    def load_sound(self, name: str, path: str):
+        """Cargar efecto de sonido."""
+        try:
+            self.sounds[name] = pygame.mixer.Sound(path)
+            self.sounds[name].set_volume(self.sfx_volume)
+        except pygame.error as e:
+            print(f"Error cargando {name}: {e}")
+    
+    def play_sound(self, name: str):
+        """Reproducir efecto de sonido."""
+        if name in self.sounds:
+            self.sounds[name].play()
+    
+    def set_music_volume(self, volume: float):
+        """Ajustar volumen música (0.0 - 1.0)."""
+        self.music_volume = max(0.0, min(1.0, volume))
+        pygame.mixer.music.set_volume(self.music_volume)
+```
+
+---
+
+## 🔍 Troubleshooting Común
+
+### Pygame no Inicializa
+
+**Síntoma**: `pygame.error: No available video device`
+
+**Solución**:
+```bash
+# Linux: Instalar dependencias
+sudo apt-get install python3-pygame
+
+# Verificar instalación
+python3 -c "import pygame; pygame.init(); print('OK')"
+```
+
+### Fuente no Carga
+
+**Síntoma**: `FileNotFoundError`
+
+**Solución**:
+```python
+import os
+
+# Usar rutas absolutas
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FONT_PATH = os.path.join(BASE_DIR, "src", "assets", "fonts", "font.ttf")
+
+# Fallback a fuente del sistema
+if os.path.exists(FONT_PATH):
+    font = pygame.font.Font(FONT_PATH, 24)
+else:
+    font = pygame.font.SysFont("arial", 24)
+```
+
+### Animación Entrecortada
+
+**Síntoma**: Animaciones inconsistentes
+
+**Solución**: Usar delta time en vez de frame counters
+```python
+# ✅ BIEN: Usar delta time
+def update(self, dt: float):
+    self.animation_timer += dt
+    if self.animation_timer >= self.animation_speed:
+        self.animation_timer = 0.0
+        self.current_frame = (self.current_frame + 1) % len(self.frames)
+```
+
+### FPS Bajo
+
+**Diagnóstico**:
+```python
+# Añadir FPS counter
+fps = clock.get_fps()
+fps_text = font.render(f"FPS: {fps:.1f}", True, (255, 255, 0))
+screen.blit(fps_text, (10, 10))
+```
+
+**Soluciones**:
+- Cachear surfaces de texto
+- Usar sprite groups
+- Limitar partículas
+- Optimizar colisiones
+
+---
+
 ## 🚀 Deployment
 
 ### Crear Ejecutable (PyInstaller)
@@ -397,4 +615,5 @@ Para preguntas o problemas, consultar:
 
 ---
 
-**Última actualización**: Enero 2026 - v0.4
+**Última actualización**: Enero 2026 - v0.5
+**Revisado por**: DocWriter, GameDevSenior, PM

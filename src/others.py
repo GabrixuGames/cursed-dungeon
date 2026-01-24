@@ -266,8 +266,10 @@ class CombatMessageBox:
         # Animate each line character by character; clear inner area before drawing each frame
         for li, line in enumerate(lines):
             for i in range(1, len(line) + 1):
-                # clear inner area
-                screen.fill((0,0,0), (inner_x-4, inner_y-4, inner_w+8, inner_h+8))
+                # clear inner area with same alpha as box background for consistent opacity
+                clear_surf = pygame.Surface((inner_w + 8, inner_h + 8), pygame.SRCALPHA)
+                clear_surf.fill((0, 0, 0, 200))
+                screen.blit(clear_surf, (inner_x - 4, inner_y - 4))
                 # redraw box background/border (draw_box draws the static box)
                 self.draw_box(screen, font)
                 # draw previous full lines
@@ -291,8 +293,10 @@ class CombatMessageBox:
             pygame.time.wait(20)
 
 
-# module-level combat message box (positioned slightly lower and taller)
-combat_message_box = CombatMessageBox(margin_bottom=80, height=110)
+# module-level combat message box (FASE 5: Ajustado para menú de turnos)
+# Posicionado encima del menú de acciones (que está en Y=530)
+# margin_bottom=150 lo coloca aproximadamente en Y=450 (600-150)
+combat_message_box = CombatMessageBox(margin_bottom=40, height=100)
 
 BACKGROUND = [
     "===============================================",

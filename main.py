@@ -5,6 +5,7 @@ from src.object.main_character import MainCharacter
 from levels.start_game import get_character_name, select_starting_weapon
 from src.others import slow_print, resource_path, fade_out, fade_in, clear_dungeon_cache
 from levels.game_menu import game_menu
+from src.inventory_system import get_inventory_manager
 from config import DisplayConfig, AudioConfig, FontConfig, Colors, MenuConfig, TransitionConfig, GameConfig
 
 # Import new performance and UX systems
@@ -24,29 +25,38 @@ FPS = DisplayConfig.FPS
 settings = init_settings()
 resource_cache = get_resource_cache()
 
-# Load audio with volume settings
-try:
-    main_menu_sound = resource_cache.get_sound(resource_path(AudioConfig.MAIN_MENU_MUSIC))
-    if main_menu_sound:
-        main_menu_sound.set_volume(settings.get_volume("music"))
-        main_menu_sound.play(-1)  # Reproduce el sonido en bucle
-except Exception as e:
-    print(f"Warning: Could not load main menu music: {e}")
-    main_menu_sound = None
+# Variable global para el audio (se cargará después de pygame.init)
+main_menu_sound = None
 
 
 
 def init_pygame():
     """Inicializa Pygame y configura la ventana con manejo de errores."""
+    global main_menu_sound
     try:
         pygame.init()
+        
+        # Initialize mixer explicitly
+        try:
+            pygame.mixer.init()
+        except Exception as e:
+            print(f"Warning: Could not initialize audio mixer: {e}")
         
         # Check if pygame initialized successfully
         if not pygame.get_init():
             raise RuntimeError("Pygame failed to initialize")
+        
+        # Load audio AFTER pygame.init() with volume settings
+        try:
+            main_menu_sound = resource_cache.get_sound(resource_path(AudioConfig.MAIN_MENU_MUSIC))
+            if main_menu_sound:
+                main_menu_sound.set_volume(settings.get_volume("music"))
+                main_menu_sound.play(-1)  # Reproduce el sonido en bucle
+        except Exception as e:
+            print(f"Warning: Could not load main menu music: {e}")
+            main_menu_sound = None
 
         # Get display settings from settings manager
-        settings = get_settings()
         resolution = settings.get("display", "resolution")
         fullscreen = settings.get("display", "fullscreen")
         
@@ -340,6 +350,19 @@ def main():
                     start_weapon = select_starting_weapon(screen, font_text)
                     main_character = MainCharacter(name)
                     main_character.setWeapon(start_weapon)
+                    # Ensure inventory is attached to the character for combat usage
+                    try:
+                        inventory = get_inventory_manager()
+                        if not inventory._item_db:
+                            inventory.load_item_database()
+                        main_character.inventory_manager = inventory
+                        # Add a couple of extra items for testing menu overflow
+                        if inventory and not inventory.has_item("antidote"):
+                            inventory.add_item("antidote", 1)
+                        if inventory and not inventory.has_item("bomb"):
+                            inventory.add_item("bomb", 1)
+                    except Exception as e:
+                        print(f"Warning: Could not attach inventory: {e}")
                     
                     # Animación de carga para nueva partida
                     screen.fill(Colors.BLACK)
@@ -441,6 +464,18 @@ def main():
                         load_success = main_character.load_game()
                         
                         if load_success:
+                            # Add a couple of extra items for testing menu overflow
+                            try:
+                                inventory = get_inventory_manager()
+                                if not inventory._item_db:
+                                    inventory.load_item_database()
+                                if inventory and not inventory.has_item("antidote"):
+                                    inventory.add_item("antidote", 1)
+                                if inventory and not inventory.has_item("bomb"):
+                                    inventory.add_item("bomb", 1)
+                                main_character.inventory_manager = inventory
+                            except Exception as e:
+                                print(f"Warning: Could not add test items on load: {e}")
                             # Transición al menú del juego
                             fade_out(screen, TransitionConfig.NORMAL_FADE)
                             game_menu(DisplayConfig.WINDOW_WIDTH, DisplayConfig.WINDOW_HEIGHT, main_character, screen, font_text, font_ascii)

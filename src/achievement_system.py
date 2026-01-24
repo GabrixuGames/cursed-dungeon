@@ -374,6 +374,25 @@ class AchievementManager:
             achievement.unlock_date = None
             achievement.progress = 0
         self.save_progress()
+    
+    def to_dict(self) -> Dict:
+        """Serializa el estado de achievements para guardado."""
+        return {
+            achievement_id: {
+                "unlocked": achievement.unlocked,
+                "unlock_date": achievement.unlock_date,
+                "progress": achievement.progress
+            }
+            for achievement_id, achievement in self.achievements.items()
+        }
+    
+    def from_dict(self, data: Dict):
+        """Carga el estado de achievements desde un diccionario."""
+        for achievement_id, achievement_data in data.items():
+            if achievement_id in self.achievements:
+                self.achievements[achievement_id].unlocked = achievement_data.get("unlocked", False)
+                self.achievements[achievement_id].unlock_date = achievement_data.get("unlock_date")
+                self.achievements[achievement_id].progress = achievement_data.get("progress", 0)
 
 
 # Instancia global del gestor de logros
