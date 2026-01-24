@@ -1,6 +1,7 @@
 import pygame
 from src.others import slow_print, draw_text, resource_path
 from src.object.weapons import load_weapons
+from src.inventory_system import get_inventory_manager
 from config import Colors, MenuConfig, DisplayConfig, FontConfig, TransitionConfig
 
 def get_character_name(screen, font_text, prompt="Introduce el nombre de tu personaje:"):
@@ -105,4 +106,16 @@ def select_starting_weapon(screen, font_text):
                     selection = (selection + 1) % len(weapons_show)
                 elif event.key == pygame.K_RETURN:
                     selecting = False
-                    return weapons_show[selection]
+                    selected_weapon = weapons_show[selection]
+                    
+                    # Inicializar inventario del jugador con items iniciales
+                    inventory = get_inventory_manager()
+                    try:
+                        inventory.load_item_database()
+                        # Dar items iniciales al jugador
+                        inventory.add_item("hp_potion_small", 3)
+                        inventory.add_item("mp_potion_small", 2)
+                    except Exception as e:
+                        print(f"Advertencia: No se pudo inicializar inventario: {e}")
+                    
+                    return selected_weapon

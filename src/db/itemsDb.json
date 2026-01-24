@@ -1,0 +1,307 @@
+{
+    "consumables": [
+        {
+            "id": "hp_potion_small",
+            "name": "Poción de Vida Pequeña",
+            "description": "Restaura 30 puntos de vida",
+            "type": "consumable",
+            "category": "healing",
+            "effect": {
+                "health": 30
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 25,
+            "rarity": "common",
+            "stackable": true,
+            "max_stack": 10,
+            "icon": "🧪"
+        },
+        {
+            "id": "hp_potion_medium",
+            "name": "Poción de Vida Mediana",
+            "description": "Restaura 60 puntos de vida",
+            "type": "consumable",
+            "category": "healing",
+            "effect": {
+                "health": 60
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 50,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 10,
+            "icon": "🧪"
+        },
+        {
+            "id": "hp_potion_large",
+            "name": "Poción de Vida Grande",
+            "description": "Restaura 120 puntos de vida",
+            "type": "consumable",
+            "category": "healing",
+            "effect": {
+                "health": 120
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 100,
+            "rarity": "rare",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "🧪"
+        },
+        {
+            "id": "mp_potion_small",
+            "name": "Poción de Maná Pequeña",
+            "description": "Restaura 20 puntos de maná",
+            "type": "consumable",
+            "category": "mana",
+            "effect": {
+                "mana": 20
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 20,
+            "rarity": "common",
+            "stackable": true,
+            "max_stack": 10,
+            "icon": "💙"
+        },
+        {
+            "id": "mp_potion_medium",
+            "name": "Poción de Maná Mediana",
+            "description": "Restaura 40 puntos de maná",
+            "type": "consumable",
+            "category": "mana",
+            "effect": {
+                "mana": 40
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 40,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 10,
+            "icon": "💙"
+        },
+        {
+            "id": "mp_potion_large",
+            "name": "Poción de Maná Grande",
+            "description": "Restaura 80 puntos de maná (completamente)",
+            "type": "consumable",
+            "category": "mana",
+            "effect": {
+                "mana": 80
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 80,
+            "rarity": "rare",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "💙"
+        },
+        {
+            "id": "antidote",
+            "name": "Antídoto",
+            "description": "Cura el estado de Envenenado",
+            "type": "consumable",
+            "category": "cure",
+            "effect": {
+                "cure_state": "Envenenado"
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 30,
+            "rarity": "common",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "🍀"
+        },
+        {
+            "id": "burn_salve",
+            "name": "Ungüento Frío",
+            "description": "Cura el estado de Quemado",
+            "type": "consumable",
+            "category": "cure",
+            "effect": {
+                "cure_state": "Quemado"
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 30,
+            "rarity": "common",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "❄️"
+        },
+        {
+            "id": "bandage",
+            "name": "Vendaje",
+            "description": "Cura el estado de Sangrado",
+            "type": "consumable",
+            "category": "cure",
+            "effect": {
+                "cure_state": "Sangrado"
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 25,
+            "rarity": "common",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "🩹"
+        },
+        {
+            "id": "courage_potion",
+            "name": "Poción de Valor",
+            "description": "Cura el estado de Miedo",
+            "type": "consumable",
+            "category": "cure",
+            "effect": {
+                "cure_state": "Miedo"
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 35,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 5,
+            "icon": "🛡️"
+        },
+        {
+            "id": "bomb",
+            "name": "Bomba Pequeña",
+            "description": "Inflige 40 de daño al enemigo",
+            "type": "consumable",
+            "category": "damage",
+            "effect": {
+                "damage": 40
+            },
+            "target": "enemy",
+            "usable_in": ["combat"],
+            "price": 60,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "💣"
+        },
+        {
+            "id": "grenade",
+            "name": "Granada Explosiva",
+            "description": "Inflige 80 de daño al enemigo",
+            "type": "consumable",
+            "category": "damage",
+            "effect": {
+                "damage": 80
+            },
+            "target": "enemy",
+            "usable_in": ["combat"],
+            "price": 120,
+            "rarity": "rare",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "💥"
+        },
+        {
+            "id": "strength_elixir",
+            "name": "Elixir de Fuerza",
+            "description": "Aumenta el daño en 15 durante 3 turnos",
+            "type": "consumable",
+            "category": "buff",
+            "effect": {
+                "buff": {
+                    "stat": "damage",
+                    "value": 15,
+                    "duration": 3
+                }
+            },
+            "target": "self",
+            "usable_in": ["combat"],
+            "price": 70,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "⚡"
+        },
+        {
+            "id": "defense_elixir",
+            "name": "Elixir de Defensa",
+            "description": "Reduce daño recibido en 10 durante 3 turnos",
+            "type": "consumable",
+            "category": "buff",
+            "effect": {
+                "buff": {
+                    "stat": "defense",
+                    "value": 10,
+                    "duration": 3
+                }
+            },
+            "target": "self",
+            "usable_in": ["combat"],
+            "price": 70,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "🛡️"
+        },
+        {
+            "id": "speed_elixir",
+            "name": "Elixir de Velocidad",
+            "description": "Aumenta velocidad en 0.3 durante 3 turnos",
+            "type": "consumable",
+            "category": "buff",
+            "effect": {
+                "buff": {
+                    "stat": "speed",
+                    "value": 0.3,
+                    "duration": 3
+                }
+            },
+            "target": "self",
+            "usable_in": ["combat"],
+            "price": 80,
+            "rarity": "rare",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "💨"
+        },
+        {
+            "id": "phoenix_feather",
+            "name": "Pluma de Fénix",
+            "description": "Revive automáticamente con 50% HP si mueres",
+            "type": "consumable",
+            "category": "special",
+            "effect": {
+                "auto_revive": {
+                    "health_percent": 0.5
+                }
+            },
+            "target": "self",
+            "usable_in": ["combat", "dungeon"],
+            "price": 200,
+            "rarity": "legendary",
+            "stackable": true,
+            "max_stack": 1,
+            "icon": "🔥"
+        },
+        {
+            "id": "escape_rope",
+            "name": "Cuerda de Escape",
+            "description": "Garantiza huida exitosa del combate (no funciona contra jefes)",
+            "type": "consumable",
+            "category": "special",
+            "effect": {
+                "guaranteed_flee": true
+            },
+            "target": "self",
+            "usable_in": ["combat"],
+            "price": 50,
+            "rarity": "uncommon",
+            "stackable": true,
+            "max_stack": 3,
+            "icon": "🧵"
+        }
+    ]
+}

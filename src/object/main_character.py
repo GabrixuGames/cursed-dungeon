@@ -12,6 +12,7 @@ class MainCharacter:
         self._level = 1
         self._damage = 10
         self._health = 150
+        self._max_health = 150  # Salud máxima para cálculos de pociones
         self._evade_chance = 5
         self._experience = 0
         self._weapon = None
@@ -19,6 +20,13 @@ class MainCharacter:
         self._atributes = 0
         self._to_next_level = 100 * (1.2 ** (self._level - 1))
         self._state = None
+        
+        # Sistemas adicionales
+        self.inventory_manager = None  # Se inicializará cuando sea necesario
+        self.skill_manager = None  # Se inicializa en start_game o load_game
+        self._active_buffs = []  # Buffs temporales activos
+        self._auto_revive = None  # Efecto de Pluma de Fénix
+        self._guaranteed_flee = False  # Efecto de Cuerda de Escape
     
     # Properties
     @property
@@ -254,12 +262,15 @@ class MainCharacter:
                 "level": self.level,
                 "damage": self.damage,
                 "health": self.health,
+                "max_health": self._max_health,
                 "evade_chance": self.evade_chance,
                 "experience": self.experience,
                 "money": self.money,
                 "atributes": self.atributes,
                 "weapon": self.weapon,
-                "to_next_level": self.to_next_level
+                "to_next_level": self.to_next_level,
+                "inventory": self.inventory_manager.to_dict() if self.inventory_manager else None,
+                "skill_manager": self.skill_manager.to_dict() if self.skill_manager else None
             }
             
             save_manager = get_save_manager()
@@ -293,12 +304,25 @@ class MainCharacter:
             self.level = character_data["level"]
             self.damage = character_data["damage"]
             self.health = character_data["health"]
+            self._max_health = character_data.get("max_health", 150)
             self.evade_chance = character_data["evade_chance"]
             self.experience = character_data["experience"]
             self.money = character_data["money"]
             self.atributes = character_data["atributes"]
             self.weapon = character_data["weapon"]
             self.to_next_level = character_data.get("to_next_level", 100 * (1.2 ** (self.level - 1)))
+            
+            # Cargar inventario si existe
+            if character_data.get("inventory"):
+                from src.inventory_system import get_inventory_manager
+                self.inventory_manager = get_inventory_manager()
+                self.inventory_manager.from_dict(character_data["inventory"])
+            
+            # Cargar skill_manager si existe
+            if character_data.get("skill_manager"):
+                from src.skill_system import get_skill_manager
+                self.skill_manager = get_skill_manager()
+                self.skill_manager.from_dict(character_data["skill_manager"])
             
             return True
             
