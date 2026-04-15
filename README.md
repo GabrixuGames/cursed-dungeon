@@ -1,152 +1,140 @@
-# 🐉 Cursed Dungeon
+# Cursed Dungeon
 
-## 📌 Descripción general
+Cursed Dungeon is a turn-based RPG set in a dark and cursed world. The player explores dangerous dungeons, fights increasingly powerful enemies, and grows stronger through a progression system built around combat, resource management, and strategic decision-making.
 
-*Cursed Dungeon* es un juego de rol por turnos ambientado en un universo oscuro y maldito. El jugador explora mazmorras, se enfrenta a enemigos cada vez más peligrosos y desarrolla sus habilidades a través de un sistema de progresión por niveles. El objetivo final es derrotar a *Ella, Diosa de la Perdición*, en el nivel 70.
-El juego combina mecánicas clásicas de combate RPG con elementos estratégicos como estados alterados, gestión de recursos y enemigos con dificultad creciente. Está diseñado para ejecutarse inicialmente en terminal, con planes de expansión a una versión gráfica usando Pygame.
+The long-term goal of the adventure is to reach the final confrontation against Ella, Goddess of Doom.
 
----
+## Screenshots
 
-## 🧪 Versión actual
+<p align="center">
+  <img src="./.github/assets/cursed-dungeon-menu.png" alt="Cursed Dungeon main menu" width="900">
+</p>
 
-### *v0.3* - Major Game Improvements & Refactoring 🚀
-**Actualización completa del sistema de juego con mejoras visuales y arquitectónicas**
+<p align="center">
+  <img src="./.github/assets/cursed-dungeon-ingame-menu.png" alt="Cursed Dungeon in-game menu" width="900">
+</p>
 
-#### 🎮 Nuevas características:
-- **Sistema de configuración centralizada** - Configuración unificada en `config.py`
-- **Gestor de configuraciones de usuario** - Personalización de audio, display y controles
-- **Sistema avanzado de gestión de pantalla** - Mejor renderizado y efectos visuales
-- **Gestor de entrada mejorado** - Controles más responsivos y configurables
-- **Sistema de subida de nivel refactorizado** - Progresión más fluida y balanceada
+<p align="center">
+  <img src="./.github/assets/cursed-dungeon-dungeon-walk.png" alt="Cursed Dungeon dungeon exploration" width="900">
+</p>
 
-#### 🔧 Mejoras de código:
-- **Refactorización completa del personaje principal** - Código más limpio y mantenible
-- **Sistema de armas mejorado** - Mejor manejo de errores y validación de datos
-- **Menú principal expandido** - Nuevas opciones y mejor navegación
-- **Tienda rediseñada** - UI completamente renovada con mejor experiencia de usuario
-- **Sistema de animaciones expandido** - Nuevas animaciones más fluidas y dinámicas
+## Overview
 
-#### 🎨 Mejoras visuales:
-- **Fondo de mazmorra dinámico** - Elementos animados como antorchas y gotas de agua
-- **Efectos visuales avanzados** - Sistema de fade in/out para transiciones suaves
-- **Renderizado de texto mejorado** - Mejor legibilidad y presentación
-- **Nuevas fuentes tipográficas** - Tipografías modernas para mejor experiencia visual
+Cursed Dungeon is a Python-based RPG project focused on building a solid gameplay foundation with a modular architecture. The project combines classic turn-based combat ideas with a structure designed to be maintainable, expandable, and easier to evolve over time.
 
-#### 📁 Restructuración del código:
-- **Modularización avanzada** - Mejor separación de responsabilidades
-- **Sistema robusto de manejo de errores** - Validación y respaldo automático
-- **Archivos obsoletos eliminados** - Limpieza del código base
-- **Nueva organización de assets** - Estructura preparada para contenido gráfico
+The codebase is organized around separated gameplay systems such as combat, progression, shop logic, input handling, display management, and configuration, making it easier to iterate on new features without turning the project into a monolith.
 
-#### 📊 Estadísticas de la actualización:
-- **46 archivos modificados**
-- **3,542 líneas agregadas**
-- **634 líneas eliminadas**
+## Current Status
 
----
+The project is currently in active development and already includes a playable core experience.
 
-### *v0.2* - Base funcional
-Incluye: sistema de combate funcional, enemigos con estados alterados, animaciones básicas en terminal, y primeras pruebas con estructura modular.
+At the moment, the game includes:
+- A functional turn-based combat system
+- Character progression and level-up logic
+- Enemy scaling and status effects
+- A shop system
+- Centralized configuration and settings management
+- A growing visual layer built with Pygame
+- A modular project structure prepared for future expansion
 
----
+The current focus is on improving the overall gameplay experience, polishing the visual presentation, and continuing to refine the internal architecture.
 
-## 🖥️ Lenguajes utilizados
+## Features
 
-- 🐍 *Python* 3.9+
+- Turn-based combat with attack flow, effects, and battle logic
+- Character progression with scalable stats and leveling
+- Enemies with increasing difficulty and combat variation
+- Status effects that add strategic depth to encounters
+- Shop mechanics to support progression
+- Configuration and settings management
+- Pygame-based rendering and interface systems
+- Modular Python architecture for easier maintenance and extension
 
----
+## Tech Stack
 
-## 🧰 Librerías y frameworks
+**Language**
+- Python 3.9+
 
-### 🎨 Renderizado y UI:
-- **pygame** – Sistema de renderizado, efectos visuales y gestión de pantalla
-- **asciimatics** – Animaciones por terminal (compatible con versión anterior)
+**Libraries**
+- Pygame
+- Asciimatics
 
-### 🗃️ Gestión de datos:
-- **json** – Configuración, guardado de partidas y bases de datos
-- **os** – Gestión de archivos y rutas del sistema
+**Standard Modules**
+- json
+- os
+- time
+- random
+- math
 
-### 🔧 Utilidades estándar:
-- **time** – Manejo de tiempos y delays en animaciones
-- **random** – Generación de eventos aleatorios en combate
-- **math** – Cálculos de balanceo y progresión
-
----
-
-## ✨ Características del proyecto
-
-### 🎮 Gameplay Core:
-- ⚔️ **Combate por turnos** con animaciones de ataque y efectos dinámicos
-- 📈 **Sistema de progresión** hasta nivel 70 con balanceo mejorado
-- 👿 **Jefes únicos** con habilidades especiales y mecánicas avanzadas
-- 🧪 **Estados alterados** con probabilidades dinámicas según tipo de enemigo
-- 🛍️ **Sistema de tienda** completamente rediseñado con mejor experiencia
-
-### 🎨 Experiencia Visual:
-- 🎬 **Animaciones fluidas** con sistema expandido de efectos
-- 🏰 **Fondo dinámico** con elementos animados (antorchas, gotas de agua)
-- ✨ **Efectos visuales** avanzados con transiciones fade in/out
-- 🔤 **Tipografías modernas** para mejor legibilidad
-
-### ⚙️ Arquitectura Técnica:
-- 🧱 **Estructura modular** con separación clara de responsabilidades
-- 📋 **Sistema de configuración** centralizada y personalizable
-- 🎮 **Gestión avanzada de entrada** con controles configurables
-- 💾 **Sistema robusto de guardado** con validación y respaldo automático
-- 📁 **Preparado para escalabilidad** (versión gráfica, contenido adicional)
-
----
-
-## 🗂️ Estructura del proyecto
+## Project Structure
 
 ```plaintext
 cursed-dungeon/
-├── 🚀 config.py                  # Configuración centralizada del juego
-├── 🎮 main.py                    # Punto de entrada principal
-├── 📋 settings.json              # Configuraciones de usuario
-├── 🎲 levels/                    # Niveles y sistemas de juego
-│   ├── ⚔️ dungeon_combat.py      #   Sistema de combate en mazmorras
-│   ├── 📱 game_menu.py           #   Menú principal expandido
-│   ├── 📈 level_up.py            #   Sistema de progresión refactorizado
-│   ├── 🛍️ shop.py                #   Tienda rediseñada
-│   └── 🎯 start_game.py          #   Inicialización del juego
-├── 💻 src/                       # Código fuente principal
-│   ├── 🖥️ display_manager.py     #   Gestión de pantalla y renderizado
-│   ├── 🎮 input_manager.py       #   Gestión avanzada de entrada
-│   ├── 🔧 others.py              #   Utilidades y funciones auxiliares
-│   ├── ⚙️ settings_manager.py    #   Gestión de configuraciones
-│   ├── 🎬 animations/            #   Sistema de animaciones
-│   │   ├── 🎭 animations.py      #     Animaciones principales
-│   │   ├── ✨ new_animations.py  #     Nuevas animaciones avanzadas
-│   │   └── 🚶 walking.py         #     Animaciones de movimiento
-│   ├── 🎨 assets/                #   Recursos del juego
-│   │   └── 🔤 fonts/             #     Fuentes tipográficas
-│   ├── 📊 db/                    #   Bases de datos del juego
-│   │   ├── 👾 enemyDb.json       #     Datos de enemigos
-│   │   └── ⚔️ weaponsDb.json     #     Datos de armas
-│   ├── 🎯 object/                #   Clases principales
-│   │   ├── 👤 main_character.py  #     Personaje principal refactorizado
-│   │   ├── 👿 enemy.py           #     Sistema de enemigos
-│   │   └── 🗡️ weapons.py         #     Sistema de armas mejorado
-│   └── 🔊 sounds/                #   Efectos de sonido
-└── 📖 README.md                  # Documentación del proyecto
+├── config.py
+├── main.py
+├── settings.json
+├── levels/
+│   ├── dungeon_combat.py
+│   ├── game_menu.py
+│   ├── level_up.py
+│   ├── shop.py
+│   └── start_game.py
+├── src/
+│   ├── display_manager.py
+│   ├── input_manager.py
+│   ├── others.py
+│   ├── settings_manager.py
+│   ├── animations/
+│   │   ├── animations.py
+│   │   ├── new_animations.py
+│   │   └── walking.py
+│   ├── assets/
+│   │   └── fonts/
+│   ├── db/
+│   │   ├── enemyDb.json
+│   │   └── weaponsDb.json
+│   ├── object/
+│   │   ├── main_character.py
+│   │   ├── enemy.py
+│   │   └── weapons.py
+│   └── sounds/
+└── README.md
 ```
 
----
+## Getting Started
 
-## 🎯 Próximas versiones
+Clone the repository:
 
-### 🔮 v0.4 - Planificado:
-- 🎮 Sistema de sprites y gráficos 2D 
-- 🔊 Integración completa de audio
-- 🌍 Nuevas mazmorras y contenido
-- 🎨 Mejoras adicionales de UI/UX
+```bash
+git clone https://github.com/GabrixuGames/cursed-dungeon.git
+cd cursed-dungeon/cursed-dungeon
+```
 
-```plaintext
-Cursed-Dungeon/
-├── data/           # Configuración de enemigos, niveles, estados, etc.
-├── engine/         # Lógica del juego: combate, gestión de turnos, etc.
-├── animations/     # Animaciones y efectos visuales en terminal
-├── assets/         # Archivos visuales o sonoros (planeado para el futuro)
-├── main.py         # Punto de entrada del juego
-└── README.md       # Este archivo con la documentació
+Create and activate a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install pygame asciimatics
+```
+
+Run the game:
+
+```bash
+python3 main.py
+```
+
+## Notes
+
+This project is being built as both a game and a learning process around Python architecture, gameplay systems, modular design, and graphical integration with Pygame.
+
+Some parts of the codebase are still evolving, but the current structure already reflects the intended direction of the project and provides a solid foundation for future development.
+
+## Author
+
+Developed by **GabrixuGames**.

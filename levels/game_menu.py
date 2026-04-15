@@ -6,7 +6,7 @@ from levels.dungeon_combat import dungeon
 from src.animations.animations_game_menu import precalculate_bonfire_frames
 from config import Colors, MenuConfig, TransitionConfig, AudioConfig
 
-game_menu_sound = pygame.mixer.Sound(resource_path("src\\sounds\\menu_bonfire_sound.mp3"))
+game_menu_sound = pygame.mixer.Sound(resource_path("src/sounds/menu_bonfire_sound.mp3"))
 game_menu_sound.set_volume(AudioConfig.SFX_VOLUME)
 
 
